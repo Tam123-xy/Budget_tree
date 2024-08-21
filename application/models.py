@@ -1,12 +1,22 @@
-from . import db
+from application import db, app
 from datetime import datetime
 
-class IncomeExpense(db.Model):
+class IncomeExpenses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type =db.Column(db.String, default='income', nullable=False)
-    category =db.Column(db.String(30), nullable=False, default='rent')
-    date = db.Column(db.DateTime, nullable= False, default= datetime.utcnow)
-    amount =db.column(db.Integer, nullable= False)
+    amount = db.Column(db.Integer, nullable=False)
+    category = db.Column(db.String(30), default='Rent',nullable=False)
+    type = db.Column(db.String(30), default = 'Income', nullable=False)
+    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __str__(self):
-        return self.id
+    def __init__(self,amount,type,category):
+        self.type= amount
+        self.type= type
+        self.type= category
+
+with app.app_context():
+    db.create_all()
+    db.session.add(IncomeExpenses(amount = 2500, category ='Income',type= 'Salary'))
+    db.session.add(IncomeExpenses(amount =330, category ='Expense', type='Rent'))
+    db.session.add(IncomeExpenses(amount =200,category ='Expense', type= 'Grocery'))
+
+
