@@ -1,19 +1,23 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SubmitField, IntegerField
+from wtforms import SelectField, SubmitField, IntegerField, DateField
 from wtforms.validators import DataRequired
 
-class UserDataForm(FlaskForm):
-    amount = IntegerField('Amount', validators=[DataRequired()])
-
-    type = SelectField('Type', validators=[DataRequired()],
-                                choices=[('Income', 'Income'),
-                                        ('Expense', 'Expense')])
-    category = SelectField("Category", validators=[DataRequired()],
+class ExpenseForm(FlaskForm):
+    amount = IntegerField('Amount', validators = [DataRequired()]) 
+    category = SelectField ('Category', validators=[DataRequired()],
                                             choices =[('Rent', 'Rent'),
-                                            ('Salary', 'Salary'),
-                                            ('Investment', 'Investment'),
-                                            ('Side_hustle', 'Side_hustle')
-                                            ]
-                            )
-                                      
-    submit = SubmitField('Generate Report')                            
+                                                      ('Food and Beverage','Food and Beverage'),
+                                                      ('Shopping','Shopping'),
+                                                      ('Transport','Transport')])
+    date = DateField('Date', format='%Y-%m-%d', validators = [DataRequired()])
+    submit = SubmitField('Save')
+
+class IncomeForm(FlaskForm):
+    amount = IntegerField('Amount', validators = [DataRequired()]) 
+    category = SelectField ('Category', validators=[DataRequired()],
+                                            choices =[('Salary', 'Salary'),
+                                                      ('Bonus','Bonus'),
+                                                      ('Allowance','Allowance'),
+                                                      ('Sideline','Sideline')])
+    date = DateField('Date', format='%Y-%m-%d', validators = [DataRequired()])
+    submit = SubmitField('Save')
