@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 @app.route('/')
 def index():
     return render_template('index.html', title = 'index')
-
+ 
 @app.route('/dashboard')
 def piechart():
     return render_template('piechart.html', title = 'dashboard')
@@ -30,4 +30,7 @@ def add_expense():
         
     return render_template('add_expense.html', title="Add expenses", form=form)
         
-    
+@app.route("/dashboard")
+def dashboard():
+     
+    return render_template("dashboard.html")
