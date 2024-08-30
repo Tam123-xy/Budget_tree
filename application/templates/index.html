@@ -13,6 +13,7 @@
                     <th scope="col">Date</th>
                     <th scope="col">Type</th>
                     <th scope="col">Category</th>
+                    <th scope="col">Note</th>
                     <th scope="col">Amount</th>
                     <th scope="col">Delete</th>
                 </tr>
@@ -23,9 +24,10 @@
                             <th scope="row">{{loop.index}}</th>
                             <td>{{entry.date.strftime("%m-%d-%Y")}}</td>
                             <td>{{entry.type}}</td>
-                            <td>{{ entry.category }}</td>
-                            <td>{{ entry.amount }}</td>
-                            <td><a href="{{ url_for('delete', entry_id = entry.id) }}" class="btn btn-outline-danger btn-sm">Delete</a></td>
+                            <td>{{entry.category }}</td>
+                            <td>{{entry.nota }}</td>
+                            <td>{{entry.amount }}</td>
+                            <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
                         </tr>
                 {% endfor %}
         </tbody>
