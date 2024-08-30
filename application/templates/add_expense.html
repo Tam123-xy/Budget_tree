@@ -6,7 +6,7 @@
             <form action="" method="POST">
                 {{ form.csrf_token() }}
                 <fieldset class="form-group">
-                        <legend class="mb-4">Add Expenses</legend>
+                        <legend class="mb-4">Add Income</legend>
                     <div class="form-group">
                         {{ form.amount.label(class="form-control-label") }}
                         {% if form.amount.errors %}
@@ -24,6 +24,11 @@
                     <div class="form-group">
                         {{ form.category.label(class = "form-control-label") }}
                         {{ form.category(class = "form-control form-control-sm") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.nota.label(class = "form-control-label") }}
+                        {{ form.nota(class = "form-control form-control-sm") }}
                     </div>
             
                     <div class="form-group">

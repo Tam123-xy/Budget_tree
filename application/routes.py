@@ -23,9 +23,10 @@ def index():
         entries.append({
             'id': expense.id,
             'date': expense.date,
-            'type': 'Expense',
+            'type': expense.type,
             'category': expense.category,  # Assuming a category field exists
-            'amount': expense.amount
+            'amount': expense.amount,
+            'nota': expense.nota
         })
     
     # Add incomes to the combined list
@@ -33,9 +34,10 @@ def index():
         entries.append({
             'id': income.id,
             'date': income.date,
-            'type': 'Income',
+            'type': income.type,
             'category': income.category,  # Assuming the source acts as a category
-            'amount': income.amount
+            'amount': income.amount,
+            'nota': income.nota
         })
 
     # Sort the combined list by date in descending order
@@ -53,18 +55,22 @@ def piechart():
 def add_expense():
     form = ExpenseForm()
     if form.validate_on_submit():
-        entry = add_expenses(amount=form.amount.data, category=form.category.data, date=form.date.data)
+        entry = add_expenses(amount=form.amount.data, category=form.category.data, date=form.date.data, nota=form.nota.data)
         db.session.add(entry)
         db.session.commit()
         flash(f"RM{form.amount.data} has been added to expense record", "success")
         return redirect(url_for('index'))
+    
+    # the_expenses = add_expenses.query.order_by(add_expenses.date.desc()).all() , the_expenses = the_expenses
     return render_template('add_expense.html', title="Add expenses", form=form)
+    
+ 
 
 @app.route('/addincome', methods = ["POST", "GET"])
 def add_income():
     form = IncomeForm()
     if form.validate_on_submit():
-        entry = add_incomes(amount=form.amount.data, category=form.category.data, date=form.date.data)
+        entry = add_incomes(amount=form.amount.data, category=form.category.data, date=form.date.data,  nota=form.nota.data)
         db.session.add(entry)
         db.session.commit()
         flash(f"RM{form.amount.data} has been added to expense record", "success")
@@ -72,9 +78,9 @@ def add_income():
     return render_template('add_income.html', title="Add expenses", form=form)
 
 
-@app.route('/delete/<int:entry_id>')
-def delete(entry_id):
-    if type == 'expense':
+@app.route('/delete/<int:entry_id>/<string:entry_type>', methods=['POST', 'GET'])
+def delete(entry_id, entry_type):
+    if entry_type == 'Expense':
         entry = add_expenses.query.get_or_404(entry_id) 
         
     else:
@@ -84,3 +90,14 @@ def delete(entry_id):
     db.session.commit()
     flash('Deletion was success', 'success')
     return redirect(url_for('index'))
+
+
+# @app.route('/delete/<int:the_expense_id>')
+# def delete_expense(the_expense_id):
+
+#     the_expense = add_expenses.query.get_or_404(the_expense_id) 
+        
+#     db.session.delete(the_expense)
+#     db.session.commit()
+#     flash('Deletion was success', 'success')
+#     return redirect(url_for('index'))
