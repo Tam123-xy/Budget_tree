@@ -2,10 +2,10 @@ from application import db, app
 
 class add_expenses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Integer, nullable=False)
+    amount = db.Column(db.Double, nullable=False)
     category = db.Column(db.String(30),nullable=False)
     date = db.Column(db.DateTime, nullable=False)
-    type = db.Column(db.String(30), nullable=False, default= 'Expense')
+    type = db.Column(db.String(10), nullable=False, default= 'Expense')
     nota = db.Column(db.String(15))
 
     def __init__(self,amount, category, date, nota):
@@ -16,10 +16,10 @@ class add_expenses(db.Model):
 
 class add_incomes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Integer, nullable=False)
+    amount = db.Column(db.Double, nullable=False)
     category = db.Column(db.String(30),nullable=False)
     date = db.Column(db.DateTime, nullable=False)
-    type = db.Column(db.String(30), nullable=False, default= 'Income')
+    type = db.Column(db.String(10), nullable=False, default= 'Income')
     nota = db.Column(db.String(15))
 
     def __init__(self,amount, category, date, nota):

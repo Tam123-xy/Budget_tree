@@ -2,12 +2,8 @@ from application import app , db
 from flask import render_template, url_for, redirect,flash, get_flashed_messages
 from application.form import ExpenseForm, IncomeForm
 from application.models import add_expenses, add_incomes
+import json
 
-
-# @app.route('/')
-# def index():
-#     entries = add_expenses.query.order_by(add_expenses.date.desc()).all()
-#     return render_template('index.html', title="index", entries= entries)
 
 @app.route('/')
 def index():
@@ -46,11 +42,6 @@ def index():
     return render_template('index.html', title="index", entries=entries)
 
 
-@app.route('/dashboard')
-def piechart():
-    return render_template('piechart.html', title="dashboard")
-
-
 @app.route('/addexpense', methods = ["POST", "GET"])
 def add_expense():
     form = ExpenseForm()
@@ -65,7 +56,6 @@ def add_expense():
     return render_template('add_expense.html', title="Add expenses", form=form)
     
  
-
 @app.route('/addincome', methods = ["POST", "GET"])
 def add_income():
     form = IncomeForm()
@@ -101,3 +91,44 @@ def delete(entry_id, entry_type):
 #     db.session.commit()
 #     flash('Deletion was success', 'success')
 #     return redirect(url_for('index'))
+
+@app.route('/dashboard')
+def dashboard():
+
+    # piechart
+    expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
+    expense = [total_expense[0] for total_expense in expenses]
+
+    incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
+    income = [total_income[0] for total_income in incomes]
+
+    # linechart
+    dates = db.session.query(db.func.sum(add_expenses.amount), add_expenses.date).group_by(add_expenses.date).order_by(add_expenses.date).all()
+    over_time_expenditure = []
+    dates_labels = []
+    for amount, date in dates:
+        over_time_expenditure.append(amount)
+        dates_labels.append(date.strftime('%d-%m-%Y'))
+
+    # barchart
+    income_category_amount = (db.session.query(add_incomes.category, db.func.sum(add_incomes.amount)).group_by(add_incomes.category).all())
+
+    income_category_amounts = []
+    income_categorys = []
+    
+    for category, amount in income_category_amount:
+        income_category_amounts.append(amount)
+        income_categorys.append(category)
+
+    
+    return render_template('dashboard.html', title="dashboard", 
+                           sum_expenses = json.dumps(expense), 
+                           sum_incomes = json.dumps(income), 
+                           over_time_expenditure =json.dumps(over_time_expenditure),
+                           dates_label = json.dumps(dates_labels),
+                           income_category_amount = json.dumps(income_category_amounts),
+                           income_category = json.dumps(income_categorys)
+                           )
+
+#  let ii_category_amounts = JSON.parse ({{ income_category_amount | tojson }});
+#         let ii_categorys = JSON.parse ({{ income_category | tojson }});

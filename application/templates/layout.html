@@ -6,9 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+
     {% if not block_link %}
     <link rel="stylesheet"
         href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        href="static/styles.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     {% endif %}
 
@@ -17,6 +19,9 @@
     integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw==" 
     crossorigin="anonymous" 
     referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js" integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <link rel="static/stylesheet" href="styles.css"> -->
     
     {% if title %}
         <title>ExpenseApp - {{ title }}</title>
@@ -40,7 +45,8 @@
                             <div class="navbar-nav ml-auto mr-3">
                                 <a class="nav-item nav-link" href="{{ url_for('add_income') }}">Add income</a>
                                 <a class="nav-item nav-link" href="{{ url_for('add_expense') }}">Add expense</a>
-                                <a class="nav-item nav-link" href="{{ url_for('piechart') }}">Dashboard</a>
+                                <a class="nav-item nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                                <a class="nav-item nav-link" href="{{ url_for('add_income') }}">Tree</a>
                             </div>
                         </div>
                     </nav>
