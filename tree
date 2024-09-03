@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<head>
+    <title>Tree</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="boxes">
+            <div class="box1">Box 1
+                <button onclick="growbigger">Income</button>
+            </div>    
+            <div class="box2">Box 2
+                <button onclick="growsmaller">Expense</button>
+            </div>
+        </div>
+        <img src="tree1.png" alt="tree1">
+    </div>
+</body>
+</html>
