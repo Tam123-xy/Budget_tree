@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+{% extends 'layout.html' %}
+{% block content %}
 <head>
     <title>Tree</title>
     <link rel="stylesheet" href="style.css">
@@ -13,7 +14,9 @@
                 <button onclick="growsmaller">Expense</button>
             </div>
         </div>
-        <img src="tree1.png" alt="tree1">
+        <img src="../static/tree_images/tree2.png" alt="tree1">
     </div>
 </body>
 </html>
+
+{% endblock %}

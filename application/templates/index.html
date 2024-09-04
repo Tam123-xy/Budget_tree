@@ -31,6 +31,13 @@
                             <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
                         </tr>
                 {% endfor %}
+
+                {% for sum_expense in sum_expenses %}
+                    <tr>
+                        <th scope="row">{{sum_expense.amount}}</th>
+                    </tr>
+                {% endfor %}
+
         </tbody>
         </table>
     </div>

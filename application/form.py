@@ -19,8 +19,8 @@ class IncomeForm(FlaskForm):
     category = SelectField ('Category', validators=[DataRequired()],
                                             choices =[('💰Salary', '💰Salary'),
                                                       ('💵Bonus','💵Bonus'),
-                                                      ('Allowance','Allowance'),
-                                                      ('Sideline','Sideline')])
+                                                      ('💸Allowance','💸Allowance'),
+                                                      ('🤑Sideline','🤑Sideline')])
     date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
     nota = StringField('Nota (optional)',validators = [Optional()]) 
     submit = SubmitField('Save')
