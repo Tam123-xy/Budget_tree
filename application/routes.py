@@ -111,6 +111,13 @@ def dashboard():
         over_time_expenditure.append(amount)
         dates_labels.append(date.strftime('%d-%m-%Y'))
 
+    dates_incomes = db.session.query(db.func.sum(add_incomes.amount), add_incomes.date).group_by(add_incomes.date).order_by(add_incomes.date).all()
+    over_time_expenditure_income = []
+    dates_income_labels = []
+    for amount, date in dates_incomes:
+        over_time_expenditure_income.append(amount)
+        dates_income_labels.append(date.strftime('%d-%m-%Y'))
+
     # barchart
     income_category_amount = (db.session.query(add_incomes.category, db.func.sum(add_incomes.amount)).group_by(add_incomes.category).all())
 
@@ -127,6 +134,8 @@ def dashboard():
                            sum_incomes = json.dumps(income), 
                            over_time_expenditure =json.dumps(over_time_expenditure),
                            dates_label = json.dumps(dates_labels),
+                           over_time_income =json.dumps(over_time_expenditure_income),
+                           dates_income = json.dumps(dates_income_labels),
                            income_category_amount = json.dumps(income_category_amounts),
                            income_category = json.dumps(income_categorys)
                            )
