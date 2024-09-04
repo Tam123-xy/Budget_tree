@@ -39,7 +39,7 @@ def index():
     # Sort the combined list by date in descending order
     entries.sort(key=lambda x: x['date'], reverse=True)
 
-    return render_template('index.html', title="index", entries=entries)
+    return render_template('index.html', title="Transaction history", entries=entries)
 
 
 @app.route('/addexpense', methods = ["POST", "GET"])
@@ -52,8 +52,9 @@ def add_expense():
         flash(f"RM{form.amount.data} has been added to expense record", "success")
         return redirect(url_for('index'))
     
-    # the_expenses = add_expenses.query.order_by(add_expenses.date.desc()).all() , the_expenses = the_expenses
-    return render_template('add_expense.html', title="Add expenses", form=form)
+    sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
+
+    return render_template('add_expense.html', title="Add expense", form=form, sum_expenses=sum_expenses)
     
  
 @app.route('/addincome', methods = ["POST", "GET"])
@@ -65,7 +66,7 @@ def add_income():
         db.session.commit()
         flash(f"RM{form.amount.data} has been added to expense record", "success")
         return redirect(url_for('index'))
-    return render_template('add_income.html', title="Add expenses", form=form)
+    return render_template('add_income.html', title="Add income", form=form)
 
 
 @app.route('/delete/<int:entry_id>/<string:entry_type>', methods=['POST', 'GET'])
@@ -128,7 +129,7 @@ def dashboard():
         income_categorys.append(category)
 
     
-    return render_template('dashboard.html', title="dashboard", 
+    return render_template('dashboard.html', title="Dashboard", 
                            sum_expenses = json.dumps(expense), 
                            sum_incomes = json.dumps(income), 
                            over_time_expenditure =json.dumps(over_time_expenditure),
@@ -139,5 +140,35 @@ def dashboard():
                            income_category = json.dumps(income_categorys)
                            )
 
-#  let ii_category_amounts = JSON.parse ({{ income_category_amount | tojson }});
-#         let ii_categorys = JSON.parse ({{ income_category | tojson }});
+@app.route('/tree', methods=['POST', 'GET'])
+def tree():
+#         image_list = [
+#         'tree1.png',
+#         'tree2.png',
+#         'tree3.png',
+#         'tree4.png',
+#         'tree5.png',
+#         'tree6.png',
+#         'tree7.png',
+#         'tree8.png',
+#         'tree9.png'
+#     ]
+
+# def show_previous_image(self):
+#     if self.current_image_index > 0 :
+#         self.current_image_index -= 1
+#     else:
+#         self.current_image_index = len(self.image_labels) - 1 :
+#         self.image_label.config(image=self.image_;abels[self.current_image_index])
+
+# def show_next_image(self):
+#     if self.current_image_index < len(self.image_labels) - 1 :
+#        self.current_image_index += 1
+#     else:
+#         self.current_image_index = 0
+#     self.image_label.config(image=self.image_labels[self.current_image_index])
+    return render_template('tree.html', title="tree")
+
+
+
+
