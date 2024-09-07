@@ -2,21 +2,76 @@
 {% block content %}
 <head>
     <title>Tree</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        img {
+            width: 500px;
+            height: 500px;
+            border: 1px solid #000000;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+    </style>
+    <script>
+        let currentAmount = 0;
+        let budgetGoal = 0;
+
+        const budgetData = {};
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June", "July", "AUgust",
+            "September", "October", "November", "December"
+        ];
+        const currentMonth = new Date().getMonth();
+        const currentMonthName = monthNmaes[currentMonth];
+
+        function segBugdetGoal() {
+            const input = document.getElementById('budgetGoalInput').value);
+            budgetGoal = parseInt(input);
+
+            if(isNaN(budgetGoal) || budgetGoal <= 0) {
+                alert("Please enter a valid bufget goal greater than RM0");
+                return;
+            }
+
+            document.getElementById('goalDisplay').innerText = "Your goal : RM" + budgetGoal;
+        }
+
+        function addAmount() {
+            currentAmount += 50;
+            document.getElementById('currentAmount').innerText = currentAmount;
+
+            if (!budgetData[currentMonthName]) {
+                budgetData[currentMonthName] = { goal: budgetGoal, amountSaved: 0, image: '' };
+            }
+            budgetData[currentMonthName].amountSaved = currentAmount;
+
+            if (currentAmount >= budgetGoal) {
+                document.getElementById('goalImage').src="../static/tree_images/tree2.png";
+                alert("Congratulations! You've reached your budget goal!");
+            }
+        }
+    </script>
 </head>
 <body>
-    <div class="container">
-        <div class="boxes">
-            <div class="box1">Box 1
-                <button onclick="growbigger">Income</button>
-            </div>    
-            <div class="box2">Box 2
-                <button onclick="growsmaller">Expense</button>
-            </div>
-        </div>
-        <img src="../static/tree_images/tree2.png" alt="tree1">
-    </div>
+    <h1>Budget Goal</h1>
+    <p>
+        Set your budget goal:
+        <input type="number" id="budgetGoalInput" placeholder="Enter your goal">
+        <button onclink="setBudgetGoal()">Set Goal</button>
+    </p>
+    <p id="goalDisplay">Your goal: Not set yet</p>
+    <p>Your current amount: RM<span id="currentAmount">0</span></p>
+    <img id="goalImage" src="../static/tree_images/tree2.png">
+
 </body>
-</html>
+</html
 
 {% endblock %}
