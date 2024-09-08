@@ -55,7 +55,7 @@
     let income_vs_expense_chart = new Chart(income_vs_expense, {
             type: 'pie',
             data: {
-            labels: ['expense', 'income'],
+            labels: ['Expense', 'Income'],
                 datasets: [{
                     label: "Income Vs Expenses",
                     data: [sum_expenses, sum_incomes],
@@ -133,12 +133,12 @@
         let labels_category = JSON.parse ({{ income_category | tojson }});
         let category_amount = JSON.parse ({{ income_category_amount | tojson }});
         
-    new Chart(document.getElementById("income_category"), {
+        new Chart(document.getElementById("income_category"), {
             type: 'bar',
             data: {
-                labels: labels_category,
+            labels: labels_category,
                 datasets: [{
-                    label: "",
+                    label: '',
                     data: category_amount,
                     backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3',
                          ' #98F5E1',],
@@ -148,23 +148,24 @@
                     pointHoverRadius: 5
                 }],
                     },
-                options: {
-                        title: {
-                            display: true,
-                                text: "Income Categories",
-                                    fontSize: 20,
+            options: {
+        title: {
+                 display: true,
+                text: "Income Categories",
+                fontSize: 20,
                     },
                         legend: {
                             position: "right",
                                 labels: {
                                 fontColor: "gray"
                             },
-                            display: true,
+                            display:false,
                     },
 
                         elements: {
                             hitRadius: 3,
-                    }
+                    },
+
                     }
                 })
 
