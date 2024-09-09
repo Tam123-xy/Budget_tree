@@ -1,0 +1,16 @@
+{% for entry in entries %}
+<tr>
+    <th scope="row">{{loop.index}}</th>
+    <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
+    <td>{{entry.type}}</td>
+    <td>{{entry.category }}</td>
+    <td>{{entry.nota }}</td>
+
+    {% if entry.type == 'Expense' %}
+    <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(entry.amount) }}</span></td>
+    {% else %}
+    <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
+    {% endif %}
+    <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type, next =url_for('index') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
+</tr>
+{% endfor %}
