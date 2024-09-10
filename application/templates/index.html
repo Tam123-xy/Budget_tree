@@ -12,37 +12,39 @@
        <br>
 
        <section class="section">
-        <div class="columns">
-            <div class="column is-one-third is-offset-one-third">
-                <button type='button' hx-get="/default_table" hx-target="#results">All</button>
-                <button type='button' hx-get="/default_table" hx-target="#results">Montly</button>
-                <button type='button' hx-get="/default_table" hx-target="#results">Year</button>
+            <div class="columns">
+                <div class="column is-one-third is-offset-one-third">
+                    <button type='button' hx-get="/net_all_table" hx-target="#net_table">All</button>
+                    <button type='button' hx-get="/default_table" hx-target="#net_table">Montly</button>
+                    <button type='button' hx-get="/default_table" hx-target="#net_table">Year</button>
+                </div>
             </div>
-        </div>
 
-       <table class="table">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">Total Income</th>
-                <th scope="col">Total Expense</th>
-                <th scope="col">Net Saving</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for expense in sum_expense %}
-            {% for income in sum_income %}
-            {% for net_save in net %}
+            <table class="table"  id="net_table" >
+                <thead class="thead-dark">
                     <tr>
-                        <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
-                        <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(expense) }}</span></td>
-                        <td class="amount-field">{{  'RM ' + "{:.2f}".format(net_save) }}</td>
+                        <th scope="col">Total Income</th>
+                        <th scope="col">Total Expense</th>
+                        <th scope="col">Net Saving</th>
                     </tr>
-            {% endfor %}
-            {% endfor %}
-            {% endfor %}
-            
-        </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for expense in sum_expense %}
+                    {% for income in sum_income %}
+                    {% for net_save in net %}
+                            <tr>
+                                <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
+                                <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(expense) }}</span></td>
+                                <td class="amount-field">{{  'RM ' + "{:.2f}".format(net_save) }}</td>
+                            </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    
+                </tbody>
+            </table>
+        </section>
+
         <br>
 
         <section class="section">

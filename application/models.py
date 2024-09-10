@@ -28,5 +28,15 @@ class add_incomes(db.Model):
         self.date = date
         self.nota = nota
 
+class goal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Double, nullable=False)
+    month = db.Column(db.String(30),nullable=False)
+   
+    def __init__(self,amount,month):
+        self.amount = amount
+        self.month = month
+
+
 with app.app_context():
     db.create_all()

@@ -1,7 +1,7 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm
-from application.models import add_expenses, add_incomes
+from application.form import ExpenseForm, IncomeForm, GoalForm
+from application.models import add_expenses, add_incomes, goal
 import json
 
 
@@ -50,6 +50,21 @@ def index():
     net = [round(sum_income[0] - sum_expense[0], 2)]
 
     return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net)
+
+
+@app.route('/net_all_table')
+def net_all_table():
+    sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
+    sum_expense = [expense[0] if expense[0] is not None else 0 for expense in sum_expenses]
+
+    # Get the total incomes
+    sum_incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
+    sum_income = [income[0] if income[0] is not None else 0 for income in sum_incomes]
+
+    net = [round(sum_income[0] - sum_expense[0], 2)]
+
+    return render_template('net_all_table.html', sum_expense=sum_expense, sum_income=sum_income, net=net)
+
 
 @app.route('/default_table')
 def default_table():
@@ -190,10 +205,8 @@ def search():
     print(q)
     
     if q:
-        # results = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)).order_by(add_expenses.date.asc()).all()
-
-        expenses = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)).order_by(add_expenses.date.asc()).all()
-        incomes = db.session.query(add_incomes).filter(add_incomes.nota.icontains(q) | add_incomes.amount.icontains(q) | add_incomes.date.icontains(q)| add_incomes.category.icontains(q)).order_by(add_incomes.date.asc()).all()
+        expenses = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)| add_expenses.type.icontains(q)).order_by(add_expenses.date.asc()).all()
+        incomes = db.session.query(add_incomes).filter(add_incomes.nota.icontains(q) | add_incomes.amount.icontains(q) | add_incomes.date.icontains(q)| add_incomes.category.icontains(q)| add_incomes.type.icontains(q)).order_by(add_incomes.date.asc()).all()
 
         results = []
     
@@ -231,32 +244,14 @@ def search():
 
 @app.route('/tree', methods=['POST', 'GET'])
 def tree():
-#         image_list = [
-#         'tree1.png',
-#         'tree2.png',
-#         'tree3.png',
-#         'tree4.png',
-#         'tree5.png',
-#         'tree6.png',
-#         'tree7.png',
-#         'tree8.png',
-#         'tree9.png'
-#     ]
-
-# def show_previous_image(self):
-#     if self.current_image_index > 0 :
-#         self.current_image_index -= 1
-#     else:
-#         self.current_image_index = len(self.image_labels) - 1 :
-#         self.image_label.config(image=self.image_;abels[self.current_image_index])
-
-# def show_next_image(self):
-#     if self.current_image_index < len(self.image_labels) - 1 :
-#        self.current_image_index += 1
-#     else:
-#         self.current_image_index = 0
-#     self.image_label.config(image=self.image_labels[self.current_image_index])
-    return render_template('tree.html', title="tree")
+    form = GoalForm()
+    if form.validate_on_submit():
+        entry = goal(amount=form.amount.data, month=form.month.data)
+        db.session.add(entry)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('tree.html', title="tree", form=form)
+    
 
 
  #transactions = Transactions.query.filter(Transactions.date_posted > date.today() - timedelta(weeks=1)).all()
