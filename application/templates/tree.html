@@ -1,77 +1,44 @@
 {% extends 'layout.html' %}
 {% block content %}
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tree</title>
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        img {
-            width: 500px;
-            height: 500px;
-            border: 1px solid #000000;
-        }
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-
-    </style>
-    <script>
-        let currentAmount = 0;
-        let budgetGoal = 0;
-
-        const budgetData = {};
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June", "July", "AUgust",
-            "September", "October", "November", "December"
-        ];
-        const currentMonth = new Date().getMonth();
-        const currentMonthName = monthNmaes[currentMonth];
-
-        function segBugdetGoal() {
-            const input = document.getElementById('budgetGoalInput').value;
-            budgetGoal = parseInt(input);
-
-            if(isNaN(budgetGoal) || budgetGoal <= 0) {
-                alert("Please enter a valid bufget goal greater than RM0");
-                return;
-            }
-
-            document.getElementById('goalDisplay').innerText = "Your goal : RM" + budgetGoal;
-        }
-
-        function addAmount() {
-            currentAmount += 50;
-            document.getElementById('currentAmount').innerText = currentAmount;
-
-            if (!budgetData[currentMonthName]) {
-                budgetData[currentMonthName] = { goal: budgetGoal, amountSaved: 0, image: '' };
-            }
-            budgetData[currentMonthName].amountSaved = currentAmount;
-
-            if (currentAmount >= budgetGoal) {
-                document.getElementById('goalImage').src="../static/tree_images/tree2.png";
-                alert("Congratulations! You've reached your budget goal!");
-            }
-        }
-    </script>
 </head>
 <body>
-    <h1>Budget Goal</h1>
-    <p>
-        Set your budget goal:
-        <input type="number" id="budgetGoalInput" placeholder="Enter your goal">
-        <button onclink="setBudgetGoal()">Set Goal</button>
-    </p>
-    <p id="goalDisplay">Your goal: Not set yet</p>
-    <p>Your current amount: RM<span id="currentAmount">0</span></p>
-    <img id="goalImage" src="../static/tree_images/tree2.png">
+    <div class="container">
+        <h1>Budget Goal</h1>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-success">
+                    {{ messages[0][1] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if goal %}
+            <h3>Your goal: {{ goal[1] }}</h3>
+            <p>Status: {{ 'Achieved' if goal[2] ==1 else 'Not Achieved Yet' }}</p>
+            <img src="/static/{{ goal[3] }}" class="img-fluid">
+            {% if goal[2] == 0 %}
+                <form method="POST" action="{{ url_for('achieve_goal', goal_id=goal[0]) }}">
+                    <button type="submit" class="btn btn-success">Mark as Achieved</button>
+                </form>
+            {% else %}
+                <p>Congratulations on achieving your goal!</p>
+            {% endif %}
+        {% else %}
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.goal.label(class="form-label") }}                        {{ form.goal(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        {% endif %}
+    </div>
 </body>
-</html>
 
 {% endblock %}
