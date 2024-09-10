@@ -1,0 +1,21 @@
+<thead class="thead-dark"></thead>
+    <tr>
+        <th scope="col">Total Income</th>
+        <th scope="col">Total Expense</th>
+        <th scope="col">Net Saving</th>
+    </tr>
+</thead>
+<tbody>
+    {% for expense in sum_expense %}
+    {% for income in sum_income %}
+    {% for net_save in net %}
+            <tr>
+                <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
+                <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(expense) }}</span></td>
+                <td class="amount-field">{{  'RM ' + "{:.2f}".format(net_save) }}</td>
+            </tr>
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+    
+</tbody>
