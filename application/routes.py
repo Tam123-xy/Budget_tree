@@ -190,7 +190,37 @@ def search():
     print(q)
     
     if q:
-        results = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)).order_by(add_expenses.date.asc()).all()
+        # results = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)).order_by(add_expenses.date.asc()).all()
+
+        expenses = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)).order_by(add_expenses.date.asc()).all()
+        incomes = db.session.query(add_incomes).filter(add_incomes.nota.icontains(q) | add_incomes.amount.icontains(q) | add_incomes.date.icontains(q)| add_incomes.category.icontains(q)).order_by(add_incomes.date.asc()).all()
+
+        results = []
+    
+        # Add expenses to the combined list
+        for expense in expenses:
+            results.append({
+                'id': expense.id,
+                'date': expense.date,
+                'type': expense.type,
+                'category': expense.category,  # Assuming a category field exists
+                'amount': expense.amount,
+                'nota': expense.nota
+            })
+        
+        # Add incomes to the combined list
+        for income in incomes:
+            results.append({
+                'id': income.id,
+                'date': income.date,
+                'type': income.type,
+                'category': income.category,  # Assuming the source acts as a category
+                'amount': income.amount,
+                'nota': income.nota
+            })
+
+        # Sort the combined list by date in descending order
+        results.sort(key=lambda x: x['date'], reverse=True)
 
     else:
         results = []
