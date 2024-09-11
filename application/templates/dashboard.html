@@ -40,6 +40,16 @@
     </div>
 </div>
 
+<div class="col-xs-10 col-sm-6 col-md-6">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="expenses_category"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- -------------------------------- -->
 {% block javascript %}
 <script>
@@ -59,7 +69,7 @@
                 datasets: [{
                     label: "Income Vs Expenses",
                     data: [sum_expenses, sum_incomes],
-                    backgroundColor: ['#f16059 ', '#53a3fb'
+                    backgroundColor: ["#EF5A68", "#84B7E9"
                     ],
 
                     borderWidth: 1,
@@ -102,7 +112,7 @@
                         
                         data: amount,
                     fill: false,
-                    borderColor: "rgb(75, 192, 192)",
+                    borderColor: "rgb(241, 96, 89)",
                     lineTension: 0.1
                 }]
             },
@@ -121,7 +131,7 @@
                     label: "Saving Over Time",
                     data: income_amount,
                     fill: false,
-                    borderColor: "rgb(75, 192, 192)",
+                    borderColor: "rgb(83, 163, 251)",
                     lineTension: 0.1
                 }]
             },
@@ -140,15 +150,14 @@
                 datasets: [{
                     label: '',
                     data: category_amount,
-                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3',
-                         ' #98F5E1',],
+                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3', ' #98F5E1'],
                     borderWidth: 1,
                     hoverBorderColor: "black",
                     hoverBorderWidth: 2,
                     pointHoverRadius: 5
                 }],
                     },
-            options: {
+        options: {
         title: {
                  display: true,
                 text: "Income Categories",
@@ -169,7 +178,44 @@
                     }
                 })
 
+        let labels_categorys = JSON.parse ({{ expense_category | tojson }});
+        let categorys_amounts = JSON.parse ({{ expense_category_amount | tojson }});
+        
+        new Chart(document.getElementById("expenses_category"), {
+            type: 'bar',
+            data: {
+            labels: labels_categorys,
+                datasets: [{
+                    label: '',
+                    data: categorys_amounts,
+                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3','#98F5E1',],
+                    borderWidth: 1,
+                    hoverBorderColor: "black",
+                    hoverBorderWidth: 2,
+                    pointHoverRadius: 5
+                }],
+                    },
+            options: {
+            title: {
+                display: true,
+                text: "Expense Categories",
+                fontSize: 20,
+                    },
+                        legend: {
+                            position: "right",
+                                labels: {
+                                fontColor: "gray"
+                            },
+                            display:false,
+                    },
 
+                        elements: {
+                            hitRadius: 3,
+                    },
+
+                    }
+                })
 </script>
+
 {% endblock %}
 {% endblock %}
