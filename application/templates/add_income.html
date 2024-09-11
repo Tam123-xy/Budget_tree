@@ -68,7 +68,7 @@
                         <td>{{entry.category }}</td>
                         <td>{{entry.nota }}</td>
                         <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
-                        <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type,  next=url_for('add_income') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
+                        <td><a href="{{ url_for('delete', entry_id = entry.id,entry_type=entry.type ,next=url_for('add_income') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
                     </tr>
             {% endfor %}
         </tbody>

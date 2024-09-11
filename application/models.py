@@ -37,6 +37,18 @@ class goal(db.Model):
         self.amount = amount
         self.month = month
 
+class net(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Double, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    type = db.Column(db.String(10), nullable=False)
+   
+    def __init__(self,amount,date,type):
+        self.amount = amount
+        self.date = date
+        self.type = type
+
+
 
 with app.app_context():
     db.create_all()

@@ -1,8 +1,11 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
 from application.form import ExpenseForm, IncomeForm, GoalForm
-from application.models import add_expenses, add_incomes, goal
+from application.models import add_expenses, add_incomes, goal, net
+from sqlalchemy import func, case
 import json
+from datetime import datetime
+
 
 
 @app.route('/')
@@ -65,6 +68,27 @@ def net_all_table():
 
     return render_template('net_all_table.html', sum_expense=sum_expense, sum_income=sum_income, net=net)
 
+# @app.route('/net_montly_table')
+# def net_montly_table():
+#     nett = db.session.query(func.strftime('%Y-%m', net.date).label('month_year'), func.sum(net.amount).label('total')).group_by(func.strftime('%Y-%m', net.date)).all()
+#     income = db.session.query(func.sum(case((net.type == 'Income', net.amount),else_=0)).label('total_income')).group_by(func.strftime('%Y-%m', net.date)).all()
+#     expense = db.session.query(func.sum(case((net.type == 'Expense', +abs(net.amount)),else_=0)).label('total_income')).group_by(func.strftime('%Y-%m', net.date)).all()
+    
+#     return render_template('net_montly_table.html', nett=nett, income=income, expense=expense)
+
+@app.route('/net_montly_table')
+def net_montly_table():
+    # Query to get month-year, total, income, and expense for each month-year
+    results = db.session.query(
+        func.strftime('%Y-%m', net.date).label('month_year'),
+        func.sum(net.amount).label('total'),
+        func.sum(case((net.type == 'Income', net.amount), else_=0)).label('total_income'),
+        func.sum(case((net.type == 'Expense', func.abs(net.amount)), else_=0)).label('total_expense')
+    ).group_by(func.strftime('%Y-%m', net.date)).all()
+    
+    return render_template('net_montly_table.html', results=results)
+
+
 
 @app.route('/default_table')
 def default_table():
@@ -108,7 +132,9 @@ def add_expense():
     form = ExpenseForm()
     if form.validate_on_submit():
         entry = add_expenses(amount=form.amount.data, category=form.category.data, date=form.date.data, nota=form.nota.data)
+        nett = net(amount=-abs(form.amount.data), date=form.date.data, type='Expense')
         db.session.add(entry)
+        db.session.add(nett)
         db.session.commit()
         flash(f"RM{form.amount.data} has been added to expense record", "success")
         return redirect(url_for('index'))
@@ -123,7 +149,9 @@ def add_income():
     form = IncomeForm()
     if form.validate_on_submit():
         entry = add_incomes(amount=form.amount.data, category=form.category.data, date=form.date.data,  nota=form.nota.data)
+        nett = net(amount=(form.amount.data), date=form.date.data, type='Income')
         db.session.add(entry)
+        db.session.add(nett)
         db.session.commit()
         flash(f"RM{form.amount.data} has been added to expense record", "success")
         return redirect(url_for('index'))
@@ -133,20 +161,51 @@ def add_income():
     return render_template('add_income.html', title="Add income", form=form, incomes=incomes)
 
 
+# @app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<datetime:entry_date>', methods=['POST', 'GET'])
+# def delete(entry_id, entry_type, entry_amount, entry_date):
+#     if entry_type == 'Expense':
+#         entry = add_expenses.query.get_or_404(entry_id)
+        
+#     else:
+#         entry = add_incomes.query.get_or_404(entry_id) 
+
+#     ent = net.query.get_or_404(db.session.query(net).filter(net.type.icontains(entry_type) and net.amount.icontains(entry_amount) and net.date.icontains(entry_date)))
+    
+#     db.session.delete(entry)
+#     db.session.delete(ent)
+#     db.session.commit()
+#     flash('Deletion was success', 'success')
+
+#     # Determine the page to return to, with a fallback to 'index'
+#     next_page = request.args.get('next') 
+    
+#     # Redirect to the specified page
+#     return redirect(next_page)
+
+
 @app.route('/delete/<int:entry_id>/<string:entry_type>', methods=['POST', 'GET'])
 def delete(entry_id, entry_type):
+    # Parse the date string into a datetime object
+    # entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+
+    # Identify if it's an expense or income entry and retrieve the correct entry
     if entry_type == 'Expense':
-        entry = add_expenses.query.get_or_404(entry_id) 
-        
+        entry = add_expenses.query.get_or_404(entry_id)
     else:
-        entry = add_incomes.query.get_or_404(entry_id) 
-    
+        entry = add_incomes.query.get_or_404(entry_id)
+
+    # Find the corresponding entry in the `net` table
+    # ent = db.session.query(net.id).filter_by(amount=entry_amount, date=entry_date, type=entry_type ).get_or_404(net.id)
+
+    # Delete both entries
     db.session.delete(entry)
+    # db.session.delete(ent)
     db.session.commit()
-    flash('Deletion was success', 'success')
+
+    flash('Deletion was successful', 'success')
 
     # Determine the page to return to, with a fallback to 'index'
-    next_page = request.args.get('next') 
+    next_page = request.args.get('next', '/')
     
     # Redirect to the specified page
     return redirect(next_page)
@@ -241,7 +300,6 @@ def search():
     return render_template('search_result.html', results=results)
 
     
-
 @app.route('/tree', methods=['POST', 'GET'])
 def tree():
     form = GoalForm()
