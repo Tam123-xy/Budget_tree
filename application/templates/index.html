@@ -15,24 +15,26 @@
             <div class="columns">
                 <div class="column is-one-third is-offset-one-third">
                     <button type='button' hx-get="/net_all_table" hx-target="#net_table">All</button>
-                    <button type='button' hx-get="/default_table" hx-target="#net_table">Montly</button>
+                    <button type='button' hx-get="/net_montly_table" hx-target="#net_table">Montly</button>
                     <button type='button' hx-get="/default_table" hx-target="#net_table">Year</button>
                 </div>
             </div>
 
-            <table class="table"  id="net_table" >
+            <table class="table">
                 <thead class="thead-dark">
                     <tr>
+                        <th scope="col">Date</th>
                         <th scope="col">Total Income</th>
                         <th scope="col">Total Expense</th>
                         <th scope="col">Net Saving</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="net_table" >
                     {% for expense in sum_expense %}
                     {% for income in sum_income %}
                     {% for net_save in net %}
                             <tr>
+                                <th scope="row">ALL</th>
                                 <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
                                 <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(expense) }}</span></td>
                                 <td class="amount-field">{{  'RM ' + "{:.2f}".format(net_save) }}</td>
@@ -83,7 +85,7 @@
                                 {% else %}
                                 <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
                                 {% endif %}
-                                <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type, next =url_for('index') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
+                                <td><a href="{{ url_for('delete', entry_id=entry.id, entry_type=entry.type, entry_amount=entry.amount, entry_date=entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('index')) }}" class="btn btn-outline-danger btn-sm">Delete</a></td>
                             </tr>
                     {% endfor %}
                 </tbody>

@@ -40,16 +40,6 @@
     </div>
 </div>
 
-<div class="col-xs-10 col-sm-6 col-md-6">
-    <div class="card card-style mb-2">
-        <div class="card-body">
-            <div class="chart-container" style="position: relative;">
-                <canvas id="expenses_category"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- -------------------------------- -->
 {% block javascript %}
 <script>
@@ -178,43 +168,7 @@
                     }
                 })
 
-        let labels_categorys = JSON.parse ({{ expense_category | tojson }});
-        let categorys_amounts = JSON.parse ({{ expense_category_amount | tojson }});
-        
-        new Chart(document.getElementById("expenses_category"), {
-            type: 'bar',
-            data: {
-            labels: labels_categorys,
-                datasets: [{
-                    label: '',
-                    data: categorys_amounts,
-                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3','#98F5E1',],
-                    borderWidth: 1,
-                    hoverBorderColor: "black",
-                    hoverBorderWidth: 2,
-                    pointHoverRadius: 5
-                }],
-                    },
-            options: {
-            title: {
-                display: true,
-                text: "Expense Categories",
-                fontSize: 20,
-                    },
-                        legend: {
-                            position: "right",
-                                labels: {
-                                fontColor: "gray"
-                            },
-                            display:false,
-                    },
 
-                        elements: {
-                            hitRadius: 3,
-                    },
-
-                    }
-                })
 </script>
 
 {% endblock %}
