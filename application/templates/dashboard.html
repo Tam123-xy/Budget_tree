@@ -40,7 +40,6 @@
     </div>
 </div>
 
-
 <!-- -------------------------------- -->
 {% block javascript %}
 <script>
@@ -60,7 +59,7 @@
                 datasets: [{
                     label: "Income Vs Expenses",
                     data: [sum_expenses, sum_incomes],
-                    backgroundColor: ['#f16059 ', '#53a3fb'
+                    backgroundColor: ["#EF5A68", "#84B7E9"
                     ],
 
                     borderWidth: 1,
@@ -103,7 +102,7 @@
                         
                         data: amount,
                     fill: false,
-                    borderColor: "rgb(75, 192, 192)",
+                    borderColor: "rgb(241, 96, 89)",
                     lineTension: 0.1
                 }]
             },
@@ -122,7 +121,7 @@
                     label: "Saving Over Time",
                     data: income_amount,
                     fill: false,
-                    borderColor: "rgb(75, 192, 192)",
+                    borderColor: "rgb(83, 163, 251)",
                     lineTension: 0.1
                 }]
             },
@@ -141,15 +140,14 @@
                 datasets: [{
                     label: '',
                     data: category_amount,
-                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3',
-                         ' #98F5E1',],
+                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3', ' #98F5E1'],
                     borderWidth: 1,
                     hoverBorderColor: "black",
                     hoverBorderWidth: 2,
                     pointHoverRadius: 5
                 }],
                     },
-            options: {
+        options: {
         title: {
                  display: true,
                 text: "Income Categories",
@@ -170,8 +168,8 @@
                     }
                 })
 
-        
 
 </script>
+
 {% endblock %}
 {% endblock %}

@@ -245,8 +245,16 @@ def dashboard():
     for category, amount in income_category_amount:
         income_category_amounts.append(amount)
         income_categorys.append(category)
-
     
+    expense_category_amount = db.session.query(add_expenses.category, db.func.sum(add_expenses.amount)).group_by(add_expenses.category).all()
+
+    expense_category_amounts = []
+    expense_categorys = []
+
+    for categoryy, amountt in expense_category_amount:
+        expense_category_amounts.append(amountt)
+        expense_categorys.append(categoryy)
+
     return render_template('dashboard.html', title="Dashboard", 
                            sum_expenses = json.dumps(expense), 
                            sum_incomes = json.dumps(income), 
@@ -255,7 +263,9 @@ def dashboard():
                            over_time_income =json.dumps(over_time_expenditure_income),
                            dates_income = json.dumps(dates_income_labels),
                            income_category_amount = json.dumps(income_category_amounts),
-                           income_category = json.dumps(income_categorys)
+                           income_category = json.dumps(income_categorys),
+                           expense_category_amount = json.dumps(expense_category_amounts),
+                           expense_category = json.dumps(expense_categorys)
                            )
 
 @app.route('/search')
