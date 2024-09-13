@@ -6,13 +6,9 @@ from sqlalchemy import func, case
 import json
 from datetime import datetime
 
-
-
-@app.route('/')
-def index():
-    # Querying both models
-    expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
-    incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
+def combine_table(expenses,incomes):
+    # expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
+    # incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
 
     # Combine the entries
     entries = []
@@ -41,6 +37,44 @@ def index():
 
     # Sort the combined list by date in descending order
     entries.sort(key=lambda x: x['date'], reverse=True)
+    return entries
+
+   
+@app.route('/')
+def index():
+    # # Querying both models
+    expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
+    incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
+
+    # # Combine the entries
+    # entries = []
+    
+    # # Add expenses to the combined list
+    # for expense in expenses:
+    #     entries.append({
+    #         'id': expense.id,
+    #         'date': expense.date,
+    #         'type': expense.type,
+    #         'category': expense.category,  # Assuming a category field exists
+    #         'amount': expense.amount,
+    #         'nota': expense.nota
+    #     })
+    
+    # # Add incomes to the combined list
+    # for income in incomes:
+    #     entries.append({
+    #         'id': income.id,
+    #         'date': income.date,
+    #         'type': income.type,
+    #         'category': income.category,  # Assuming the source acts as a category
+    #         'amount': income.amount,
+    #         'nota': income.nota
+    #     })
+
+    # # Sort the combined list by date in descending order
+    # entries.sort(key=lambda x: x['date'], reverse=True)
+
+    entries = combine_table(expenses,incomes)
 
     # Get the total expenses
     sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
@@ -68,13 +102,6 @@ def net_all_table():
 
     return render_template('net_all_table.html', sum_expense=sum_expense, sum_income=sum_income, net=net)
 
-# @app.route('/net_montly_table')
-# def net_montly_table():
-#     nett = db.session.query(func.strftime('%Y-%m', net.date).label('month_year'), func.sum(net.amount).label('total')).group_by(func.strftime('%Y-%m', net.date)).all()
-#     income = db.session.query(func.sum(case((net.type == 'Income', net.amount),else_=0)).label('total_income')).group_by(func.strftime('%Y-%m', net.date)).all()
-#     expense = db.session.query(func.sum(case((net.type == 'Expense', +abs(net.amount)),else_=0)).label('total_income')).group_by(func.strftime('%Y-%m', net.date)).all()
-    
-#     return render_template('net_montly_table.html', nett=nett, income=income, expense=expense)
 
 @app.route('/net_montly_table')
 def net_montly_table():
@@ -88,41 +115,52 @@ def net_montly_table():
     
     return render_template('net_montly_table.html', results=results)
 
+@app.route('/net_yearly_table')
+def net_yearly_table():
+    results = db.session.query(
+        func.strftime('%Y', net.date).label('year'),
+        func.sum(net.amount).label('total'),
+        func.sum(case((net.type == 'Income', net.amount), else_=0)).label('total_income'),
+        func.sum(case((net.type == 'Expense', func.abs(net.amount)), else_=0)).label('total_expense')
+    ).group_by(func.strftime('%Y', net.date)).all()
+    
+    return render_template('net_yearly_table.html', results=results)
 
 
 @app.route('/default_table')
 def default_table():
-    # Querying both models
+    # # Querying both models
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
 
-    # Combine the entries
-    entries = []
+    # # Combine the entries
+    # entries = []
     
-    # Add expenses to the combined list
-    for expense in expenses:
-        entries.append({
-            'id': expense.id,
-            'date': expense.date,
-            'type': expense.type,
-            'category': expense.category,  # Assuming a category field exists
-            'amount': expense.amount,
-            'nota': expense.nota
-        })
+    # # Add expenses to the combined list
+    # for expense in expenses:
+    #     entries.append({
+    #         'id': expense.id,
+    #         'date': expense.date,
+    #         'type': expense.type,
+    #         'category': expense.category,  # Assuming a category field exists
+    #         'amount': expense.amount,
+    #         'nota': expense.nota
+    #     })
     
-    # Add incomes to the combined list
-    for income in incomes:
-        entries.append({
-            'id': income.id,
-            'date': income.date,
-            'type': income.type,
-            'category': income.category,  # Assuming the source acts as a category
-            'amount': income.amount,
-            'nota': income.nota
-        })
+    # # Add incomes to the combined list
+    # for income in incomes:
+    #     entries.append({
+    #         'id': income.id,
+    #         'date': income.date,
+    #         'type': income.type,
+    #         'category': income.category,  # Assuming the source acts as a category
+    #         'amount': income.amount,
+    #         'nota': income.nota
+    #     })
 
-    # Sort the combined list by date in descending order
-    entries.sort(key=lambda x: x['date'], reverse=True)
+    # # Sort the combined list by date in descending order
+    # entries.sort(key=lambda x: x['date'], reverse=True)
+    entries = combine_table(expenses,incomes)
 
     return render_template('default_table.html', entries=entries)
 
@@ -131,7 +169,7 @@ def default_table():
 def add_expense():
     form = ExpenseForm()
     if form.validate_on_submit():
-        entry = add_expenses(amount=form.amount.data, category=form.category.data, date=form.date.data, nota=form.nota.data)
+        entry = add_expenses(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
         nett = net(amount=-abs(form.amount.data), date=form.date.data, type='Expense')
         db.session.add(entry)
         db.session.add(nett)
@@ -161,45 +199,27 @@ def add_income():
     return render_template('add_income.html', title="Add income", form=form, incomes=incomes)
 
 
-# @app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<datetime:entry_date>', methods=['POST', 'GET'])
-# def delete(entry_id, entry_type, entry_amount, entry_date):
-#     if entry_type == 'Expense':
-#         entry = add_expenses.query.get_or_404(entry_id)
-        
-#     else:
-#         entry = add_incomes.query.get_or_404(entry_id) 
-
-#     ent = net.query.get_or_404(db.session.query(net).filter(net.type.icontains(entry_type) and net.amount.icontains(entry_amount) and net.date.icontains(entry_date)))
-    
-#     db.session.delete(entry)
-#     db.session.delete(ent)
-#     db.session.commit()
-#     flash('Deletion was success', 'success')
-
-#     # Determine the page to return to, with a fallback to 'index'
-#     next_page = request.args.get('next') 
-    
-#     # Redirect to the specified page
-#     return redirect(next_page)
-
-
-@app.route('/delete/<int:entry_id>/<string:entry_type>', methods=['POST', 'GET'])
-def delete(entry_id, entry_type):
+@app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+def delete(entry_id, entry_type, entry_amount, entry_date):
     # Parse the date string into a datetime object
-    # entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+    entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
 
     # Identify if it's an expense or income entry and retrieve the correct entry
     if entry_type == 'Expense':
         entry = add_expenses.query.get_or_404(entry_id)
+        
     else:
         entry = add_incomes.query.get_or_404(entry_id)
+        
+    if entry_type == 'Expense':
+        ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type=entry_type).first()
 
-    # Find the corresponding entry in the `net` table
-    # ent = db.session.query(net.id).filter_by(amount=entry_amount, date=entry_date, type=entry_type ).get_or_404(net.id)
+    else:
+        ent = net.query.filter_by(amount= entry_amount, date=entry_date, type=entry_type).first()
 
     # Delete both entries
     db.session.delete(entry)
-    # db.session.delete(ent)
+    db.session.delete(ent)
     db.session.commit()
 
     flash('Deletion was successful', 'success')
@@ -277,32 +297,33 @@ def search():
         expenses = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)| add_expenses.type.icontains(q)).order_by(add_expenses.date.asc()).all()
         incomes = db.session.query(add_incomes).filter(add_incomes.nota.icontains(q) | add_incomes.amount.icontains(q) | add_incomes.date.icontains(q)| add_incomes.category.icontains(q)| add_incomes.type.icontains(q)).order_by(add_incomes.date.asc()).all()
 
-        results = []
+        results = combine_table(expenses,incomes)
+        # results = []
     
-        # Add expenses to the combined list
-        for expense in expenses:
-            results.append({
-                'id': expense.id,
-                'date': expense.date,
-                'type': expense.type,
-                'category': expense.category,  # Assuming a category field exists
-                'amount': expense.amount,
-                'nota': expense.nota
-            })
+        # # Add expenses to the combined list
+        # for expense in expenses:
+        #     results.append({
+        #         'id': expense.id,
+        #         'date': expense.date,
+        #         'type': expense.type,
+        #         'category': expense.category,  # Assuming a category field exists
+        #         'amount': expense.amount,
+        #         'nota': expense.nota
+        #     })
         
-        # Add incomes to the combined list
-        for income in incomes:
-            results.append({
-                'id': income.id,
-                'date': income.date,
-                'type': income.type,
-                'category': income.category,  # Assuming the source acts as a category
-                'amount': income.amount,
-                'nota': income.nota
-            })
+        # # Add incomes to the combined list
+        # for income in incomes:
+        #     results.append({
+        #         'id': income.id,
+        #         'date': income.date,
+        #         'type': income.type,
+        #         'category': income.category,  # Assuming the source acts as a category
+        #         'amount': income.amount,
+        #         'nota': income.nota
+        #     })
 
-        # Sort the combined list by date in descending order
-        results.sort(key=lambda x: x['date'], reverse=True)
+        # # Sort the combined list by date in descending order
+        # results.sort(key=lambda x: x['date'], reverse=True)
 
     else:
         results = []
