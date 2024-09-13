@@ -10,7 +10,7 @@ class ExpenseForm(FlaskForm):
                                                       ('🍴 Food and Beverage','🍴 Food and Beverage'),
                                                       ('🛍️ Shopping','🛍️ Shopping'),
                                                       ('🚊 Transport',' 🚊Transport')])
-    date = DateField('Date', format='%Y-%m-%d ', default=date.today, validators = [DataRequired()])
+    date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
     nota = StringField('Nota (optional)', validators = [Optional()]) 
     submit = SubmitField('Save')
 

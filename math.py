@@ -1,140 +1,97 @@
-# income = [1,2,3]
-# expense = [50.1044]
+# def combine_table(expenses,incomes):
+   
+#     # Combine the entries
+#     entries = []
+    
+#     # Add expenses to the combined list
+#     for expense in expenses:
+#         entries.append({
+#             'id': expense.id,
+#             'date': expense.date,
+#             'type': expense.type,
+#             'category': expense.category,  # Assuming a category field exists
+#             'amount': expense.amount,
+#             'nota': expense.nota
+#         })
+    
+#     # Add incomes to the combined list
+#     for income in incomes:
+#         entries.append({
+#             'id': income.id,
+#             'date': income.date,
+#             'type': income.type,
+#             'category': income.category,  # Assuming the source acts as a category
+#             'amount': income.amount,
+#             'nota': income.nota
+#         })
 
-# # Calculate the net and round it to two decimal places
-# net = [round(income[0] - expense[0], 2)]
+#     # Sort the combined list by date in descending order
+#     entries.sort(key=lambda x: x['date'], reverse=True)
+#     return entries
 
-# print(net)
+# @app.route('/default_table')
+# def default_table():
+#     # # Querying both models
+#     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
+#     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
 
-# category =['income', 'expense',' net']
-# for i in category:
-#     print(i)
+    
+#     entries = combine_table(expenses,incomes)
 
-# my index page and add_expense page have the delete function, I want return redirect to own page
+#     return render_template('default_table.html', entries=entries)
 
-
-# @app.route('/delete/<int:entry_id>/<string:entry_type>', methods=['POST', 'GET'])
-# def delete(entry_id, entry_type):
-#     if entry_type == 'Expense':
-#         entry = add_expenses.query.get_or_404(entry_id) 
+# @app.route('/search')
+# def search():
+#     q = request.args.get('q')
+#     print(q)
+    
+#     if q:
+#         expenses = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)| add_expenses.type.icontains(q)).order_by(add_expenses.date.asc()).all()
+#         incomes = db.session.query(add_incomes).filter(add_incomes.nota.icontains(q) | add_incomes.amount.icontains(q) | add_incomes.date.icontains(q)| add_incomes.category.icontains(q)| add_incomes.type.icontains(q)).order_by(add_incomes.date.asc()).all()
         
-#     else:
-#         entry = add_incomes.query.get_or_404(entry_id) 
-    
-#     db.session.delete(entry)
-#     db.session.commit()
-#     flash('Deletion was success', 'success')
-#     return redirect(url_for('index'))
-
-# sum_expense = []
-
-# # Check if the list is empty, not if it's None
-# if not sum_expense:
-#     (sum_expense[0]) = 0
-
-# print(sum_expense[0])
-
-
-# sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
-# sum_incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
-    
-#     if sum_expenses is None :
-#         sum_expense = [expense[0] for expense in sum_expenses]
-#         net  = [sum_expense]
-
-#     elif sum_incomes is None:
-#         sum_income = [income[0] for income in sum_incomes]
-#         net  = [sum_income]
-
-#     elif sum_expenses is None and sum_incomes is None:
-#         net = [0]
+#         results = combine_table(expenses,incomes)
 
 #     else:
-#         sum_expense = [expense[0] for expense in sum_expenses]
-#         sum_income = [income[0] for income in sum_incomes]
-#         net = [round(sum_income[0] - sum_expense[0], 2)]
+#         results = []
 
-# the computer cannot detect if it is None
+#     return render_template('search_result.html', results=results)
 
 
+# # index,default_table,search
 
-    # sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
-    # sum_expense = [expense[0] for expense in sum_expenses]
+@app.route('/this_month_table')
+def this_month_table():
 
-    # sum_incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
-    # sum_income = [income[0] for income in sum_incomes]
+    current_year = datetime.now().year
+    current_month = datetime.now().month
 
-    # if sum_expense[0] is None and sum_incomes[0] is None:
-    #     sum_income[0] = 0
-    #     sum_income = [int(i) for i in sum_income]
-
-    #     sum_expense[0] = 0
-    #     net = [int(0)]
+    # Format the current year and month to match the strftime pattern (e.g., '2024-09')
+    current_year_month = f'{current_year}-{current_month:02d}'
     
-{% for expense in sum_expense %}
-            {% for income in sum_income %}
-            {% for net_save in net %}
-                    <tr>
-                        <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
-                        <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(expense) }}</span></td>
-                        <td class="amount-field">{{  'RM ' + "{:.2f}".format(net_save) }}</td>
-                    </tr>
-            {% endfor %}
-            {% endfor %}
-            {% endfor %}
+    # Debugging statement to check the current year and month
+    print(f"Current Year-Month: {current_year_month}")
 
-sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
-    sum_expense = [expense[0] for expense in sum_expenses]
+    # Query expenses for the current month (assuming SQLite or databases supporting strftime)
+    expenses = add_expenses.query.filter(
+        func.strftime('%Y-%m', add_expenses.date) == current_year_month
+    ).all()
 
-    sum_incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
-    sum_income = [income[0] for income in sum_incomes]
-    
-    # can
-    if sum_expense[0] is None : 
-        sum_expense[0] = 0
-        net  = [int(i) for i in sum_expense]
-
-    # can
-    elif sum_income[0] is None:
-        sum_income[0] = 0
-        net  = [int(i) for i in sum_income]
-
-    # cannot
-    elif sum_expense[0] is None and sum_incomes[0] is None:
-        sum_expense[0] = 0
-        sum_expense  = [int(i) for i in sum_expense]
-
-        sum_incomes[0] = 0
-        sum_incomes  = [int(i) for i in sum_incomes]
-
-        net = [int(0)]
-
-    # can 
-    else:
-        net = [round(sum_income[0] - sum_expense[0], 2)]
-
-can you fix the cannot, <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
-TypeError: unsupported format string passed to NoneType.__format__
-
-@app.route('/search')
-def search():
-    q = request.args.get('q')
-    print(q)
-    
-    if q:
-        results = db.session.query(add_expenses).filter(add_expenses.nota.ilike(f'%{q}%') | add_expenses.amount.ilike(f'%{q}%')).order_by(add_expenses.date.asc()).all()
-
-    else:
-        results = []
-
-    return render_template('search_result.html', results=results)
+     return render_template('this_month_table.html', entries=expenses)
 
 
-{ % for result in results %}
+{% for entry in entries %}
 <tr>
-    <td>{{result.date.strftime("%d-%m-%Y")}}</td>
-    <td>{{result.type}}</td>
-    <td>{{result.category }}</td>
-    <td>{{result.nota }}</td>
+    <th scope="row">{{loop.index}}</th>
+    <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
+    <td>{{entry.type}}</td>
+    <td>{{entry.category }}</td>
+    <td>{{entry.nota }}</td>
+
+    {% if entry.type == 'Expense' %}
+    <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(entry.amount) }}</span></td>
+    {% else %}
+    <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
+    {% endif %}
+    <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type=entry.type, entry_amount=entry.amount, entry_date=entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('index'), type=entry.type ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
 </tr>
-{ % endfor %}
+{% endfor %}

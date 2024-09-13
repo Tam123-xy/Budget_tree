@@ -164,6 +164,23 @@ def default_table():
 
     return render_template('default_table.html', entries=entries)
 
+@app.route('/this_month_table')
+def this_month_table():
+   
+    # Get the current month and year
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+
+    current_year_month = f'{current_year}-{current_month:02d}'
+
+    # Query expenses for the current month (assuming SQLite or databases supporting strftime)
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+
+    # print(f"Expenses: {expenses}")
+    # if expenses:
+    #     print(expenses[1].__dict__)
+    
+    return render_template('this_month_table.html', expenses=expenses)
 
 @app.route('/addexpense', methods = ["POST", "GET"])
 def add_expense():
