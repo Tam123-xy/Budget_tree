@@ -1,9 +1,0 @@
-{% for entry in expenses %}
-<tr>
-    <th scope="row">{{loop.index}}</th>
-    <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
-    <td>{{entry.type}}</td>
-    <td>{{entry.category }}</td>
-    <td>{{entry.nota }}</td>
-    <td>{{entry.amount }}</td>
-{% endfor %}

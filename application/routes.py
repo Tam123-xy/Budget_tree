@@ -4,12 +4,9 @@ from application.form import ExpenseForm, IncomeForm, GoalForm
 from application.models import add_expenses, add_incomes, goal, net
 from sqlalchemy import func, case
 import json
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 def combine_table(expenses,incomes):
-    # expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
-    # incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
-
     # Combine the entries
     entries = []
     
@@ -45,34 +42,6 @@ def index():
     # # Querying both models
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
-
-    # # Combine the entries
-    # entries = []
-    
-    # # Add expenses to the combined list
-    # for expense in expenses:
-    #     entries.append({
-    #         'id': expense.id,
-    #         'date': expense.date,
-    #         'type': expense.type,
-    #         'category': expense.category,  # Assuming a category field exists
-    #         'amount': expense.amount,
-    #         'nota': expense.nota
-    #     })
-    
-    # # Add incomes to the combined list
-    # for income in incomes:
-    #     entries.append({
-    #         'id': income.id,
-    #         'date': income.date,
-    #         'type': income.type,
-    #         'category': income.category,  # Assuming the source acts as a category
-    #         'amount': income.amount,
-    #         'nota': income.nota
-    #     })
-
-    # # Sort the combined list by date in descending order
-    # entries.sort(key=lambda x: x['date'], reverse=True)
 
     entries = combine_table(expenses,incomes)
 
@@ -133,33 +102,6 @@ def default_table():
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
 
-    # # Combine the entries
-    # entries = []
-    
-    # # Add expenses to the combined list
-    # for expense in expenses:
-    #     entries.append({
-    #         'id': expense.id,
-    #         'date': expense.date,
-    #         'type': expense.type,
-    #         'category': expense.category,  # Assuming a category field exists
-    #         'amount': expense.amount,
-    #         'nota': expense.nota
-    #     })
-    
-    # # Add incomes to the combined list
-    # for income in incomes:
-    #     entries.append({
-    #         'id': income.id,
-    #         'date': income.date,
-    #         'type': income.type,
-    #         'category': income.category,  # Assuming the source acts as a category
-    #         'amount': income.amount,
-    #         'nota': income.nota
-    #     })
-
-    # # Sort the combined list by date in descending order
-    # entries.sort(key=lambda x: x['date'], reverse=True)
     entries = combine_table(expenses,incomes)
 
     return render_template('default_table.html', entries=entries)
@@ -170,17 +112,23 @@ def this_month_table():
     # Get the current month and year
     current_year = datetime.now().year
     current_month = datetime.now().month
-
     current_year_month = f'{current_year}-{current_month:02d}'
 
     # Query expenses for the current month (assuming SQLite or databases supporting strftime)
     expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
 
-    # print(f"Expenses: {expenses}")
-    # if expenses:
-    #     print(expenses[1].__dict__)
-    
-    return render_template('this_month_table.html', expenses=expenses)
+    entries = combine_table(expenses,incomes)
+    return render_template('default_table.html', entries=entries)
+
+@app.route('/last_7days_table')
+def last_7days_table():
+
+    expenses = add_expenses.query.filter(add_expenses.date > date.today() - timedelta(weeks=1) ).all()
+    incomes = add_incomes.query.filter(add_incomes.date > date.today() - timedelta(weeks=1) ).all()
+
+    entries = combine_table(expenses,incomes)
+    return render_template('default_table.html', entries=entries)
 
 @app.route('/addexpense', methods = ["POST", "GET"])
 def add_expense():
@@ -315,32 +263,6 @@ def search():
         incomes = db.session.query(add_incomes).filter(add_incomes.nota.icontains(q) | add_incomes.amount.icontains(q) | add_incomes.date.icontains(q)| add_incomes.category.icontains(q)| add_incomes.type.icontains(q)).order_by(add_incomes.date.asc()).all()
 
         results = combine_table(expenses,incomes)
-        # results = []
-    
-        # # Add expenses to the combined list
-        # for expense in expenses:
-        #     results.append({
-        #         'id': expense.id,
-        #         'date': expense.date,
-        #         'type': expense.type,
-        #         'category': expense.category,  # Assuming a category field exists
-        #         'amount': expense.amount,
-        #         'nota': expense.nota
-        #     })
-        
-        # # Add incomes to the combined list
-        # for income in incomes:
-        #     results.append({
-        #         'id': income.id,
-        #         'date': income.date,
-        #         'type': income.type,
-        #         'category': income.category,  # Assuming the source acts as a category
-        #         'amount': income.amount,
-        #         'nota': income.nota
-        #     })
-
-        # # Sort the combined list by date in descending order
-        # results.sort(key=lambda x: x['date'], reverse=True)
 
     else:
         results = []
