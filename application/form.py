@@ -41,7 +41,7 @@ class this_month_table_Form(FlaskForm):
                                                       ('11','November'),
                                                       ('12','December')       
                                                       ])
-    submit = SubmitField('Done Set')
+    submit = SubmitField('Done')
 
 class GoalForm(FlaskForm):
     amount = DecimalField('Enter your goal', validators=[DataRequired(),  NumberRange(min=0.01)])
