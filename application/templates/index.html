@@ -52,23 +52,42 @@
         <section class="section">
             <div class="columns">
                 <div class="column is-one-third is-offset-one-third">
-                    <input type='text' class="input" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
-                    <button type='button' hx-get="/default_table" hx-target="#results">All</button>
-                    <button type='button' hx-get="/this_month_table" hx-target="#results">This month</button>
-                    <button type='button' hx-get="/last_7days_table" hx-target="#results">Last 7 days</button>
+                    <row>
+                        <form action="" method="POST">
+                            <input type='text' class="input" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+                            <button type='button' hx-get="/default_table" hx-target="#results">All</button>
+                            <button type='button' hx-get="/this_month_table" hx-target="#results">This month</button>
+                            <button type='button' hx-get="/last_7days_table" hx-target="#results">Last 7 days</button>
+                            {{ form.csrf_token() }}
+                                <div class="form-group">
+                                    {{ form.month.label(class = "form-control-label") }}
+                                    {{ form.month(class = "input is-small") }}
+                                </div>
+            
+                                <div class="form-group">
+                                    {{ form.year.label(class = "form-control-label") }}
+                                    {{ form.year(class = "input is-small") }}
+                                </div>
+                        
+                                <div class="form-group border-bottom pb-3">
+                                    {{ form.submit(class="input is-small")}}
+                                </div>
+                            <button type="submit"  hx-get="/set"  hx-target="#results">Generate table</button>
+                        </form>
+                    </row>
                 </div>
             </div>
 
             <table class="table">
                 <thead class="thead-dark">
                     <tr>
-                        <th scope="col">ID</th>
+                        <th scope="col">No</th>
                         <th scope="col">Date</th>
                         <th scope="col">Type</th>
                         <th scope="col">Category</th>
                         <th scope="col">Note</th>
                         <th scope="col">Amount</th>
-                        <th scope="col">Delete</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody id="results">

@@ -1,7 +1,7 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm
-from application.models import add_expenses, add_incomes, goal, net
+from application.form import ExpenseForm, IncomeForm, GoalForm, this_month_table_Form
+from application.models import add_expenses, add_incomes, goal, net, month_and_year
 from sqlalchemy import func, case
 import json
 from datetime import datetime, date, timedelta
@@ -36,10 +36,18 @@ def combine_table(expenses,incomes):
     entries.sort(key=lambda x: x['date'], reverse=True)
     return entries
 
-   
-@app.route('/')
+@app.route('/', methods = ["POST", "GET"])
 def index():
-    # # Querying both models
+    form = this_month_table_Form()
+    if form.validate_on_submit():
+        db.session.query(month_and_year).delete()
+        db.session.commit()
+
+        entry = month_and_year(month=form.month.data, year=form.year.data)
+        db.session.add(entry)
+        db.session.commit()
+    
+    # Querying both models
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
 
@@ -55,8 +63,36 @@ def index():
 
     net = [round(sum_income[0] - sum_expense[0], 2)]
 
-    return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net)
+    return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net, form=form)
 
+@app.route('/set', methods=['POST','GET'])
+def set():
+    latest_entry = db.session.query(month_and_year).first()
+    current_year_month = f'{latest_entry.year}-{int(latest_entry.month):02d}'
+    print(current_year_month)
+   
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+
+    entries = combine_table(expenses,incomes)
+
+    return render_template('default_table.html',entries=entries)
+
+
+@app.route('/check', methods = ["POST", "GET"])
+def check():
+    form = this_month_table_Form()
+    if form.validate_on_submit():
+        entry = month_and_year(month=form.month.data, year=form.year.data)
+        db.session.add(entry)
+        db.session.commit()
+        flash(f"RM{form.month.data} has been added to expense record", "success")
+        return redirect(url_for('index'))
+    else:
+        print(form.errors) 
+
+    return render_template('check.html', title="Add expense", form=form )
+    
 
 @app.route('/net_all_table')
 def net_all_table():
@@ -113,6 +149,7 @@ def this_month_table():
     current_year = datetime.now().year
     current_month = datetime.now().month
     current_year_month = f'{current_year}-{current_month:02d}'
+    print(current_year_month)
 
     # Query expenses for the current month (assuming SQLite or databases supporting strftime)
     expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
@@ -256,7 +293,6 @@ def dashboard():
 @app.route('/search')
 def search():
     q = request.args.get('q')
-    print(q)
     
     if q:
         expenses = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)| add_expenses.type.icontains(q)).order_by(add_expenses.date.asc()).all()
@@ -280,14 +316,3 @@ def tree():
         return redirect(url_for('index'))
     return render_template('tree.html', title="tree", form=form)
     
-
-
- #transactions = Transactions.query.filter(Transactions.date_posted > date.today() - timedelta(weeks=1)).all()
-
- #transactions = Transactions.query.filter(Transactions.datetime_posted > datetime.now() - timedelta(days=30)).all()
-
-# transactions = db.session.query(Transactions.date_posted, func.sum(Transactions.amount)).group_by(Transactions.date_posted).all()
-
-#transactions = db.session.query(func.strftime('%Y', Transactions.date_posted), func.sum(Transactions.amount)).group_by(func.strftime('%Y', Transactions.date_posted)).all()
-
-
