@@ -1,140 +1,37 @@
-# income = [1,2,3]
-# expense = [50.1044]
+<form hx-post="/set" hx-target="#results" hx-swap="innerHTML">
+    <label for="month">Month</label>
+    <select name="month" id="month">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+    </select>
+    <label for="year">Year</label>
+    <input type="number" id="year" name="year" min="1" style="width: 100px;">
+    <button type="submit">Set</button>
+</form>
+<button type="submit"  hx-get="/net" hx-target="#results">Generate table</button>
 
-# # Calculate the net and round it to two decimal places
-# net = [round(income[0] - expense[0], 2)]
+@app.route('/set', methods=['POST','GET'])
+def set():
+    month = request.form.get('month')
+    year = request.form.get('year')
+    print(month)
+    print(year)
+    current_year_month = f'{year}-{month}'
 
-# print(net)
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
 
-# category =['income', 'expense',' net']
-# for i in category:
-#     print(i)
+    entries = combine_table(expenses,incomes)
 
-# my index page and add_expense page have the delete function, I want return redirect to own page
-
-
-# @app.route('/delete/<int:entry_id>/<string:entry_type>', methods=['POST', 'GET'])
-# def delete(entry_id, entry_type):
-#     if entry_type == 'Expense':
-#         entry = add_expenses.query.get_or_404(entry_id) 
-        
-#     else:
-#         entry = add_incomes.query.get_or_404(entry_id) 
-    
-#     db.session.delete(entry)
-#     db.session.commit()
-#     flash('Deletion was success', 'success')
-#     return redirect(url_for('index'))
-
-# sum_expense = []
-
-# # Check if the list is empty, not if it's None
-# if not sum_expense:
-#     (sum_expense[0]) = 0
-
-# print(sum_expense[0])
-
-
-# sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
-# sum_incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
-    
-#     if sum_expenses is None :
-#         sum_expense = [expense[0] for expense in sum_expenses]
-#         net  = [sum_expense]
-
-#     elif sum_incomes is None:
-#         sum_income = [income[0] for income in sum_incomes]
-#         net  = [sum_income]
-
-#     elif sum_expenses is None and sum_incomes is None:
-#         net = [0]
-
-#     else:
-#         sum_expense = [expense[0] for expense in sum_expenses]
-#         sum_income = [income[0] for income in sum_incomes]
-#         net = [round(sum_income[0] - sum_expense[0], 2)]
-
-# the computer cannot detect if it is None
-
-
-
-    # sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
-    # sum_expense = [expense[0] for expense in sum_expenses]
-
-    # sum_incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
-    # sum_income = [income[0] for income in sum_incomes]
-
-    # if sum_expense[0] is None and sum_incomes[0] is None:
-    #     sum_income[0] = 0
-    #     sum_income = [int(i) for i in sum_income]
-
-    #     sum_expense[0] = 0
-    #     net = [int(0)]
-    
-{% for expense in sum_expense %}
-            {% for income in sum_income %}
-            {% for net_save in net %}
-                    <tr>
-                        <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
-                        <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(expense) }}</span></td>
-                        <td class="amount-field">{{  'RM ' + "{:.2f}".format(net_save) }}</td>
-                    </tr>
-            {% endfor %}
-            {% endfor %}
-            {% endfor %}
-
-sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
-    sum_expense = [expense[0] for expense in sum_expenses]
-
-    sum_incomes = db.session.query(db.func.sum(add_incomes.amount)).all()
-    sum_income = [income[0] for income in sum_incomes]
-    
-    # can
-    if sum_expense[0] is None : 
-        sum_expense[0] = 0
-        net  = [int(i) for i in sum_expense]
-
-    # can
-    elif sum_income[0] is None:
-        sum_income[0] = 0
-        net  = [int(i) for i in sum_income]
-
-    # cannot
-    elif sum_expense[0] is None and sum_incomes[0] is None:
-        sum_expense[0] = 0
-        sum_expense  = [int(i) for i in sum_expense]
-
-        sum_incomes[0] = 0
-        sum_incomes  = [int(i) for i in sum_incomes]
-
-        net = [int(0)]
-
-    # can 
-    else:
-        net = [round(sum_income[0] - sum_expense[0], 2)]
-
-can you fix the cannot, <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(income) }}</span></td>
-TypeError: unsupported format string passed to NoneType.__format__
-
-@app.route('/search')
-def search():
-    q = request.args.get('q')
-    print(q)
-    
-    if q:
-        results = db.session.query(add_expenses).filter(add_expenses.nota.ilike(f'%{q}%') | add_expenses.amount.ilike(f'%{q}%')).order_by(add_expenses.date.asc()).all()
-
-    else:
-        results = []
-
-    return render_template('search_result.html', results=results)
-
-
-{ % for result in results %}
-<tr>
-    <td>{{result.date.strftime("%d-%m-%Y")}}</td>
-    <td>{{result.type}}</td>
-    <td>{{result.category }}</td>
-    <td>{{result.nota }}</td>
-</tr>
-{ % endfor %}
+    return render_template('default_table.html',entries=entries)
+                        
