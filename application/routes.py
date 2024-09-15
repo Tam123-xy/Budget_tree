@@ -290,6 +290,21 @@ def dashboard():
                            expense_category = json.dumps(expense_categorys)
                            )
 
+@app.route('/monthly_charts')
+def this_month_chart():
+    # Get the current month and year
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    current_year_month = f'{current_year}-{current_month:02d}'
+    print(current_year_month)
+
+    # Query expenses for the current month (assuming SQLite or databases supporting strftime)
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+
+    entries = combine_table(expenses,incomes)
+    return render_template('default_table.html', entries=entries)
+
 @app.route('/search')
 def search():
     q = request.args.get('q')
