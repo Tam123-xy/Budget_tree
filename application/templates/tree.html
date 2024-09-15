@@ -1,42 +1,26 @@
 {% extends 'layout.html' %}
 {% block content %}
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree</title>
+</head>
 <body>
     <div class="container">
-    
-        {% if goal %}
-        <h3>Your goal: {{ goal[1] }}</h3>
-        <p>Current Savings: {{ goal[2] }} / {{ goal[3] }}</p>
-        <p>Status: {{ 'Achieved' if goal[5] == 1 else 'In Progress' }}</p>
-        <img src="/static/{{ goal[4] }}" class="img-fluid" alt="Tree Progress Image">
 
-        {% if goal[5] == 0 %}
-            <form method="POST" action="{{ url_for('update_savings_route', goal_id=goal[0]) }}">
-                {{ savings_form.hidden_tag() }}
-                <div class="form-group">
-                    {{ savings_form.amount_saved.label }}
-                    {{ savings_form.amount_saved(class="form-control") }}
-                </div>
-                <button type="submit" class="btn btn-success">Update Savings</button>
-            </form>
+        {% if goal %}
+            <h3>Your goal: {{ goal[1] }}</h3>
+            <p>Status: {{ 'Achieved' if goal[2] ==1 else 'Not Achieved Yet' }}</p>
+            <img src="/static/{{ goal[3] }}" class="img-fluid">
+            {% if goal[2] == 0 %}
+                <form method="POST" action="{{ url_for('achieve_goal', goal_id=goal[0]) }}">
+                    <button type="submit" class="btn btn-success">Mark as Achieved</button>
+                </form>
+            {% else %}
+                <p>Congratulations on achieving your goal!</p>
+            {% endif %}
         {% else %}
-            <p>Congratulations on achieving your goal!</p>
-        {% endif %}
-    {% else %}
-        <form method="POST" action="/">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.goal.label }}
-                {{ form.goal(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.goal_amount.label }}
-                {{ form.goal_amount(class="form-control") }}
-            </div>
-            <button type="submit" class="btn btn-primary">Save Goal</button>
-        </form>   
-        
-        <!-- Show the form to save a goal if there is no existing goal -->
-        <form action="{{ url_for('tree') }}" method="POST">
+
+        <form action="" method="POST">
             {{ form.csrf_token() }}
             <fieldset class="form-group">
                 <div class="form-group">
@@ -64,15 +48,6 @@
             </fieldset>
         </form>
         {% endif %}
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <div class="alert alert-success">
-            {{ messages[0][1] }}
-        </div>
-    {% endif %}
-{% endwith %}
-
-        <img src="../static/tree_images/tree_goal.jpg" width="550" heigth="550">
     </div>
 </body>
 
