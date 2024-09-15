@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, DateField, StringField, DecimalField
+from wtforms import SelectField, SubmitField, DateField, StringField, DecimalField, IntegerField
 from wtforms.validators import DataRequired, NumberRange, Optional
 from datetime import date
 
@@ -10,7 +10,7 @@ class ExpenseForm(FlaskForm):
                                                       ('🍴 Food and Beverage','🍴 Food and Beverage'),
                                                       ('🛍️ Shopping','🛍️ Shopping'),
                                                       ('🚊 Transport',' 🚊Transport')])
-    date = DateField('Date', format='%Y-%m-%d', default=date.today, validators = [DataRequired()])
+    date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
     nota = StringField('Nota (optional)', validators = [Optional()]) 
     submit = SubmitField('Save')
 
@@ -25,20 +25,38 @@ class IncomeForm(FlaskForm):
     nota = StringField('Nota (optional)',validators = [Optional()]) 
     submit = SubmitField('Save')
 
+class this_month_table_Form(FlaskForm):
+    year = IntegerField('Year', validators=[DataRequired(), NumberRange(min=1)])
+    month = SelectField ('Month' , validators=[DataRequired()],
+                                            choices  =[('1', 'January'),
+                                                      ('2','February'),
+                                                      ('3','March'),
+                                                      ('4',' April'),
+                                                      ('5','May'),
+                                                      ('6','June'),
+                                                      ('7','July'),
+                                                      ('8','August'),
+                                                      ('9','September'),
+                                                      ('10','October'),
+                                                      ('11','November'),
+                                                      ('12','December')       
+                                                      ])
+    submit = SubmitField('Done')
+
 class GoalForm(FlaskForm):
     amount = DecimalField('Enter your goal', validators=[DataRequired(),  NumberRange(min=0.01)])
     month = SelectField ('Month' , validators=[DataRequired()],
-                                            choices  =[('January', 'January'),
-                                                      ('February','February'),
-                                                      ('March','March'),
-                                                      ('April',' April'),
-                                                      ('May','May'),
-                                                      ('June','June'),
-                                                      ('July','July'),
-                                                      ('August','August'),
-                                                      ('September','September'),
-                                                      ('October','October'),
-                                                      ('November','November'),
-                                                      ('December','December')       
+                                            choices  =[('1', 'January'),
+                                                      ('2','February'),
+                                                      ('3','March'),
+                                                      ('4',' April'),
+                                                      ('5','May'),
+                                                      ('6','June'),
+                                                      ('7','July'),
+                                                      ('8','August'),
+                                                      ('9','September'),
+                                                      ('10','October'),
+                                                      ('11','November'),
+                                                      ('12','December')       
                                                       ])
     submit = SubmitField('Save Goal')

@@ -12,8 +12,7 @@
         {% else %}
         <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(result.amount) }}</span></td>
         {% endif %}
-        <td><a href="{{ url_for('delete', entry_id = result.id, entry_type = result.type, next =url_for('index') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
-    </tr>
+        <td><a href="{{ url_for('delete', entry_id = result.id, entry_type=result.type, entry_amount=result.amount, entry_date=result.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('index'), type=result.type ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
     {% endfor %}
 {% else %}
     <tr>
