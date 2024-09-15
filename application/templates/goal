@@ -7,53 +7,67 @@ import sqlite3
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'goal'
 
+IMAGES = [
+    "../static/tree_images/tree1.png",
+    "../static/tree_images/tree2.png",
+    "../static/tree_images/tree3.png",
+    "../static/tree_images/tree_goal.jpg"
+]
+
+#initialize database and create the table if it doesn't exist
+def init_db():
+    with sqlite3.connect('goals.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS goals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       goal TEXT,
+                       progress INTEGER,
+                       image TEXT
+            )
+        ''')
+        conn.commit()
+
+def save_goal(goal_text):
+    print(f"Saving goal: {goal_text}")  # Debugging line
+    with sqlite3.connect('goals.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO goals (goal, achieved, image) VALUES (?, ?, ?)',
+                       (goal_text, 0, 'tree_images/tree1.png'))  # Initially, achieved is 0
+        conn.commit()
+
+#fetch the current goal from the database
+def get_goal():
+    with sqlite3.connect('goals.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, goal, progress, image')
+        return cursor.fetchone()
+    
 class GoalForm(FlaskForm):
     goal = StringField('Enter your goal', validators=[DataRequired()])
     submit = SubmitField('Save Goal')
 
-IMAGES = [
-    "../static/tree_images/tree2.png"
-    "../static/tree_images/tree3.png"
-    "../static/tree_images/tree4.png"
-    "../static/tree_images/tree5.png"
-]
-
-def init_db():
-    with sqlite3.connect('goals.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS')
-
-def save_goal(goal):
-    with sqlite3.connect('goals.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO goals (goal, achieved) VALUES (?,?)', (goal, 0))
-        conn.commit()
-
-def update_goal_status(goal_id):
-    with sqlite3.connect('goal.db') as conn:
-        cursor = conn.cursor()
-        new_image = IMAGES[1]
-        cursor.execute('UPDATE goals SET achieved = 1, image = ? id = ?', (new_image, goal_id))
-        conn.commit()
-
-def get_goal():
-    with sqlite3.connect('goals.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, goal, achieved, image')
-        return cursor.fetchone()
-    
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def tree():
     form = GoalForm()
-    goal_data = get_goal()
 
     if form.validate_on_submit():
         goal = form.goal.data
-        save_goal(goal)
+        save_goal(goal_text)
         flash('Goal saved successfully!', 'success')
-        return redirect(url_for('index'))
+        
+        return redirect(url_for('tree'))
     
-    return render_template('tree.html', form=form, goal=goal_data)
+    # fetch the current goal to display after saving
+    current_goal = get_goal()
+    if current_goal:
+        goal_text = current_goal[1]
+        image = current_goal[3] or '../static/tree_images/tree1.png'
+    else:
+        goal_text = "No goal set"
+        image = '../static/tree_images/tree1.png'
+    
+    return render_template('tree.html', form=form, goal=current_goal, image=image)
 
 if __name__ == '__main__':
     init_db()
