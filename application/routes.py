@@ -320,14 +320,40 @@ def search():
 
     return render_template('search_result.html', results=results)
 
-    
-@app.route('/tree', methods=['POST', 'GET'])
+IMAGES = [
+    "../static/tree_images/tree1.png", # 0-33% progress
+    "../static/tree_images/tree2.png", # 34-66% progress
+    "../static/tree_images/tree3.png", # 67-99% progress
+    "../static/tree_images/tree_goal.jpg" # 100% progress (goal achieved)
+]
+
+@app.route('/', methods=['GET', 'POST'])
 def tree():
     form = GoalForm()
+
     if form.validate_on_submit():
-        entry = goal(amount=form.amount.data, month=form.month.data)
-        db.session.add(entry)
+        amount = form.amount.data
+        month = int(form.month.data)
+        year = int(form.year.data)
+        
+        # Save the goal
+        new_goal = goal(amount=amount, month=month, year=year)
+        db.session.add(new_goal)
         db.session.commit()
-        return redirect(url_for('index'))
-    return render_template('tree.html', title="tree", form=form)
-    
+
+        flash('Goal added successfully!', 'success')
+        return redirect(url_for('tree'))
+
+    # Fetch the current goal to display
+    current_goal = goal.query.order_by(goal.id.desc()).first()
+    if current_goal:
+        goal_text = f"Goal Amount: {current_goal.amount}, Month: {current_goal.month}, Year: {current_goal.year}"
+        image = current_goal.image
+    else:
+        goal_text = "No goal set"
+        image = IMAGES[0]
+
+    return render_template('tree.html', form=form, goal=goal_text, image=image)
+
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -21,11 +21,9 @@ def init_db():
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS goals (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                goal TEXT,
-                current_savings INTEGER,
-                goal_amount INTEGER,
-                image TEXT,
-                achieved INTEGER
+                amount REAL NOT NULL,
+                month INTEGER NOT NULL,
+                year INTEGER NOT NULL
             )
         ''')
         conn.commit()
