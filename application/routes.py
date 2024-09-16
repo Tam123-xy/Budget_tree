@@ -290,6 +290,21 @@ def dashboard():
                            expense_category = json.dumps(expense_categorys)
                            )
 
+@app.route('/monthly_charts')
+def this_month_chart():
+    # Get the current month and year
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    current_year_month = f'{current_year}-{current_month:02d}'
+    print(current_year_month)
+
+    # Query expenses for the current month (assuming SQLite or databases supporting strftime)
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+
+    entries = combine_table(expenses,incomes)
+    return render_template('default_table.html', entries=entries)
+
 @app.route('/search')
 def search():
     q = request.args.get('q')
@@ -305,35 +320,15 @@ def search():
 
     return render_template('search_result.html', results=results)
 
-IMAGES = [
-    "static/tree_images/tree1.png",  # 0-33% progress
-    "static/tree_images/tree2.png",  # 34-66% progress
-    "static/tree_images/tree3.png",  # 67-99% progress
-    "static/tree_images/tree_goal.jpg"  # 100% progress (goal achieved)
-]
-
-@app.route('/', methods=['GET', 'POST'])
+    
+@app.route('/tree', methods=['POST', 'GET'])
 def tree():
     form = GoalForm()
 
     if form.validate_on_submit():
-        amount = form.amount.data
-        month = int(form.month.data)
-        year = int(form.year.data)
-        
-        new_goal = goal(amount=amount, month=month, year=year)
-        db.session.add(new_goal)
+        entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
+        db.session.add(entry)
         db.session.commit()
-
-        flash('Goal added successfully!', 'success')
-        return redirect(url_for('tree'))
-
-    current_goal = goal.query.order_by(goal.id.desc()).first()
-    if current_goal:
-        goal_text = f"Goal Amount: {current_goal.amount}, Month: {current_goal.month}, Year: {current_goal.year}"
-        image = current_goal.image
-    else:
-        goal_text = "No goal set"
-        image = IMAGES[0]
-
-    return render_template('tree.html', form=form, goal=goal_text, image=image)
+        return redirect(url_for('index'))
+    return render_template('tree.html', title="tree", form=form)
+    

@@ -49,7 +49,17 @@
         </div>
     </div>
 </div>
+
+<section class="section"></section>
+    <div class="columns">
+        <div class="column is-one-third is-offset-one-third">
+            <button type='monthly' hx-get="/monthly_charts" hx-target="#net_table">Monthly</button>
+            <button type='yearly' hx-get="/yearly_charts" hx-target="#net_table">Yearly</button>
+        </div>
+    </div>
+    
 <!-- -------------------------------- -->
+
 {% block javascript %}
 <script>
     Chart.scaleService.updateScaleDefaults('linear', {
@@ -68,7 +78,7 @@
                 datasets: [{
                     label: "Income Vs Expenses",
                     data: [sum_expenses, sum_incomes],
-                    backgroundColor: ["#EF5A68", "#84B7E9"
+                    backgroundColor: ["#EF5A68", "#53a3fb"
                     ],
 
                     borderWidth: 1,
@@ -98,8 +108,8 @@
             }
         });
 
-        let labels = JSON.parse ({{ dates_label | tojson }});
-        let amount = JSON.parse ({{ over_time_expenditure | tojson }});
+    let labels = JSON.parse ({{ dates_label | tojson }});
+    let amount = JSON.parse ({{ over_time_expenditure | tojson }});
 
     new Chart(document.getElementById("expenses_over_time"), {
             type: "line",
@@ -118,8 +128,8 @@
                 options: {}
         });
 
-        let income_labels = JSON.parse ({{ dates_income | tojson }});
-        let income_amount = JSON.parse ({{ over_time_income | tojson }});
+    let income_labels = JSON.parse ({{ dates_income | tojson }});
+    let income_amount = JSON.parse ({{ over_time_income | tojson }});
 
     new Chart(document.getElementById("incomes_over_time"), {
             type: "line",
@@ -139,10 +149,10 @@
             }
         });
        
-        let labels_category = JSON.parse ({{ income_category | tojson }});
-        let category_amount = JSON.parse ({{ income_category_amount | tojson }});
+    let labels_category = JSON.parse ({{ income_category | tojson }});
+    let category_amount = JSON.parse ({{ income_category_amount | tojson }});
         
-        new Chart(document.getElementById("income_category"), {
+    new Chart(document.getElementById("income_category"), {
             type: 'bar',
             data: {
             labels: labels_category,
@@ -177,10 +187,10 @@
                     }
                 })
 
-                let labels_categorys = JSON.parse ({{ expense_category | tojson }});
-        let categorys_amounts = JSON.parse ({{ expense_category_amount | tojson }});
+    let labels_categorys = JSON.parse ({{ expense_category | tojson }});
+    let categorys_amounts = JSON.parse ({{ expense_category_amount | tojson }});
         
-        new Chart(document.getElementById("expenses_category"), {
+    new Chart(document.getElementById("expenses_category"), {
             type: 'bar',
             data: {
             labels: labels_categorys,
@@ -215,6 +225,8 @@
                     }
                 })
 </script>
+
+
 
 {% endblock %}
 {% endblock %}
