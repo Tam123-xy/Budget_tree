@@ -40,9 +40,6 @@ class goal(db.Model):
     amount = db.Column(db.Double, nullable=False)
     month = db.Column(db.String(30),nullable=False)
     year = db.Column(db.Integer, nullable=False)
-    current_savings = db.Column(db.Float, default=0.0)
-    image = db.Column(db.String(255), default=IMAGES[0])
-    achieved = db.Column(db.Boolean, default=False)
 
     def __init__(self,amount,month,year):
         self.amount = amount

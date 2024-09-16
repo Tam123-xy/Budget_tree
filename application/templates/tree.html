@@ -4,82 +4,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tree</title>
 </head>
-
 <body>
-    <h1>Set Your Goal</h1>
-    
-    <!-- Display the form -->
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.amount.label }}<br>
-            {{ form.amount() }}<br>
-            {% for error in form.amount.errors %}
-                <span class="error">{{ error }}</span><br>
-            {% endfor %}
-        </div>
-        
-        <div>
-            {{ form.month.label }}<br>
-            {{ form.month() }}<br>
-            {% for error in form.month.errors %}
-                <span class="error">{{ error }}</span><br>
-            {% endfor %}
-        </div>
+    <div class="container">
 
-        <div>
-            {{ form.year.label }}<br>
-            {{ form.year() }}<br>
-            {% for error in form.year.errors %}
-                <span class="error">{{ error }}</span><br>
-            {% endfor %}
-        </div>
+        <form action="" method="POST">
+            {{ form.csrf_token() }}
+            <fieldset class="form-group">
+                <div class="form-group">
+                    {{ form.amount.label(class="form-control-label") }}
+                    {% if form.amount.errors %}
+                        {{ form.amount(class="form-control form-control-sm is-invalid") }}
+                        {% for error in form.amount.errors %}
+                            <div class="invalid-feedback">
+                                <span>{{error}}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        {{ form.amount(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
 
-        <div>
-            {{ form.submit() }}
-        </div>
-    </form>
-    
-    <!-- Display flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flash">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
+                <div class="form-group">
+                    {{ form.month.label(class = "form-control-label") }}
+                    {{ form.month(class = "form-control form-control-sm") }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.year.label(class = "form-control-label") }}
+                    {{ form.year(class = "form-control form-control-sm") }}
+                </div>
+
+                <div class="form-group border-bottom pb-3">
+                    {{ form.submit(class="btn btn-outline-info btn-block")}}
+                </div>
+            </fieldset>
+        </form>
+
+        {% if goal %}
+        <h3>Your goal:RM{{ goal.amount }}</h3>
+        <img src="../static/tree_images/tree1.png" class="img-fluid" alt="Goal Image">
         {% endif %}
-    {% endwith %}
 
-    <!-- Display current goal and image -->
-    <h2>Current Goal</h2>
-    <p>{{ goal }}</p>
-    <img src="{{ url_for('static', filename=image) }}" alt="Goal Progress">
-
-    <style>
-        .error {
-            color: red;
-            font-size: small;
-        }
-        .flash {
-            list-style-type: none;
-            padding: 0;
-        }
-        .flash li {
-            padding: 10px;
-            margin-bottom: 5px;
-            border: 1px solid #ddd;
-        }
-        .flash .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .flash .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+    </div>
 </body>
-
 
 {% endblock %}
