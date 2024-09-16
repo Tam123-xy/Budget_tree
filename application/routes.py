@@ -5,6 +5,7 @@ from application.models import add_expenses, add_incomes, goal, net, month_and_y
 from sqlalchemy import func, case
 import json
 from datetime import datetime, date, timedelta
+import sqlite3
 
 def combine_table(expenses,incomes):
     # Combine the entries
@@ -326,9 +327,27 @@ def tree():
     form = GoalForm()
 
     if form.validate_on_submit():
+        goal_amount = form.amount.data if form.amount.data else 0 # set amount = 0 if user doesnt enter a value
         entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
         db.session.add(entry)
         db.session.commit()
-        return redirect(url_for('index'))
-    return render_template('tree.html', title="tree", form=form)
+        return redirect(url_for('tree'))
+    
+     # Fetch the latest goal from the database
+    current_goal = db.session.query(goal).order_by(goal.id.desc()).first()
+    
+    # Decide which image to display based on current progress
+    goal_amount = 100  # Your goal amount, or fetch it from the database
+    image = "../static/tree_images/tree1.png"  # Default image
+
+    if current_goal:
+        current_amount = current_goal.amount
+        if current_amount >= goal_amount:
+            image = "../static/tree_images/tree_goal.png"
+        elif current_amount >= goal_amount / 2:
+            image = "../static/tree_images/tree3.png"
+        elif current_amount > 0:
+            image = "../static/tree_images/tree2.png"
+
+    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image)
     
