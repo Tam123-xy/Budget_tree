@@ -5,7 +5,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="income_vs_expense"></canvas>
+                <canvas id="income_vs_expense_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -15,7 +15,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="expenses_over_time"></canvas>
+                <canvas id="expenses_over_time_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -25,7 +25,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="income_category"></canvas>
+                <canvas id="income_category_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -35,7 +35,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="incomes_over_time"></canvas>
+                <canvas id="incomes_over_time_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -45,7 +45,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="expenses_category"></canvas>
+                <canvas id="expenses_category_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -55,15 +55,26 @@
     <div class="columns">
         <div class="column is-one-third is-offset-one-third">
             <button type='monthly' hx-get="/monthly_charts" hx-target="#net_table">Months</button>
-            <button type='7_days' hx-get="/yearly_charts" hx-target="#net_table">7 days</button>
         </div>
     </div>
+
 
 
 <!-- -------------------------------- -->
 
 {% block javascript %}
 <script>
+    new DataTable('#net_monthly_table')
+
+    function extractDataTable(){
+        const table = Document.getElementById('this_month_table');
+        const dataRows = tableDocument.getElementByTagName("")
+
+        console.log(dataRows);
+
+    }
+    extractDataTable()
+
     Chart.scaleService.updateScaleDefaults('linear', {
             ticks: {
                 min: 0

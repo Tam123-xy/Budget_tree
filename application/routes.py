@@ -291,7 +291,7 @@ def dashboard():
                            )
 
 @app.route('/monthly_charts')
-def this_month_chart():
+def monthly_charts():
     # Get the current month and year
     current_year = datetime.now().year
     current_month = datetime.now().month
@@ -303,7 +303,7 @@ def this_month_chart():
     incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
 
     entries = combine_table(expenses,incomes)
-    return render_template('default_table.html', entries=entries)
+    return render_template('monthly_charts.html', entries=entries)
 
 @app.route('/search')
 def search():
