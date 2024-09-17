@@ -1,7 +1,7 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, this_month_table_Form
-from application.models import add_expenses, add_incomes, goal, net, month_and_year
+from application.form import ExpenseForm, IncomeForm, GoalForm, this_month_table_Form, create_categoryFrom
+from application.models import add_expenses, add_incomes, goal, net, month_and_year, category
 from sqlalchemy import func, case
 import json
 from datetime import datetime, date, timedelta
@@ -37,8 +37,7 @@ def combine_table(expenses,incomes):
     entries.sort(key=lambda x: x['date'], reverse=True)
     return entries
 
-@app.route('/', methods = ["POST", "GET"])
-def index():
+def search_month_year_database():
     form = this_month_table_Form()
     if form.validate_on_submit():
         db.session.query(month_and_year).delete()
@@ -47,6 +46,12 @@ def index():
         entry = month_and_year(month=form.month.data, year=form.year.data)
         db.session.add(entry)
         db.session.commit()
+
+
+@app.route('/', methods = ["POST", "GET"])
+def index():
+   
+    search_month_year_database()
     
     # Querying both models
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
@@ -64,7 +69,7 @@ def index():
 
     net = [round(sum_income[0] - sum_expense[0], 2)]
 
-    return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net, form=form)
+    return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net, form = this_month_table_Form())
 
 @app.route('/set', methods=['POST','GET'])
 def set():
@@ -78,6 +83,17 @@ def set():
     entries = combine_table(expenses,incomes)
 
     return render_template('default_table.html',entries=entries)
+
+@app.route('/set_income', methods=['POST','GET'])
+def set_income():
+    latest_entry = db.session.query(month_and_year).first()
+    current_year_month = f'{latest_entry.year}-{int(latest_entry.month):02d}'
+    print(current_year_month)
+   
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+    incomes.sort(key=lambda x: x.date, reverse=True)
+
+    return render_template('default_table_income.html',incomes=incomes)
 
 
 @app.route('/check', methods = ["POST", "GET"])
@@ -143,6 +159,22 @@ def default_table():
 
     return render_template('default_table.html', entries=entries)
 
+@app.route('/default_table_income')
+def default_table_income():
+    # # Querying both models
+    incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
+
+    return render_template('default_table_income.html', incomes=incomes)
+
+@app.route('/default_table_expense')
+def default_table_expense():
+    # # Querying both models
+    expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
+
+    return render_template('default_table_expense.html', expenses=expenses)
+
+
+
 @app.route('/this_month_table')
 def this_month_table():
    
@@ -159,6 +191,38 @@ def this_month_table():
     entries = combine_table(expenses,incomes)
     return render_template('default_table.html', entries=entries)
 
+@app.route('/this_month_table_income')
+def this_month_table_income():
+   
+    # Get the current month and year
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    current_year_month = f'{current_year}-{current_month:02d}'
+    print(current_year_month)
+
+    # Query expenses for the current month (assuming SQLite or databases supporting strftime)
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+    incomes.sort(key=lambda x: x.date, reverse=True)
+
+    return render_template('default_table_income.html', incomes=incomes)
+
+@app.route('/this_month_table_expense')
+def this_month_table_expense():
+   
+    # Get the current month and year
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    current_year_month = f'{current_year}-{current_month:02d}'
+    print(current_year_month)
+
+    # Query expenses for the current month (assuming SQLite or databases supporting strftime)
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    expenses.sort(key=lambda x: x.date, reverse=True)
+
+    return render_template('default_table_expense.html', expenses=expenses)
+
+
+
 @app.route('/last_7days_table')
 def last_7days_table():
 
@@ -168,9 +232,30 @@ def last_7days_table():
     entries = combine_table(expenses,incomes)
     return render_template('default_table.html', entries=entries)
 
+@app.route('/last_7days_table_income')
+def last_7days_table_income():
+
+    incomes = add_incomes.query.filter(add_incomes.date > date.today() - timedelta(weeks=1) ).all()
+    incomes.sort(key=lambda x: x.date, reverse=True)
+
+    return render_template('default_table_income.html', incomes=incomes)
+
+@app.route('/last_7days_table_expense')
+def last_7days_table_expense():
+
+    expenses = add_expenses.query.filter(add_expenses.date > date.today() - timedelta(weeks=1) ).all()
+    expenses.sort(key=lambda x: x.date, reverse=True)
+
+    return render_template('default_table_expense.html', expenses=expenses)
+
 @app.route('/addexpense', methods = ["POST", "GET"])
 def add_expense():
+    search_month_year_database()
     form = ExpenseForm()
+
+    categories = db.session.query(category.category).filter(category.type == 'Expense').all()
+    form.category.choices = [(c.category, c.category) for c in categories]
+
     if form.validate_on_submit():
         entry = add_expenses(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
         nett = net(amount=-abs(form.amount.data), date=form.date.data, type='Expense')
@@ -182,12 +267,17 @@ def add_expense():
     
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
     
-    return render_template('add_expense.html', title="Add expense", form=form, expenses=expenses )
+    return render_template('add_expense.html', title="Add expense", form=form, expenses=expenses, forms = this_month_table_Form() )
     
  
 @app.route('/addincome', methods = ["POST", "GET"])
 def add_income():
+    search_month_year_database()
     form = IncomeForm()
+
+    categories = db.session.query(category.category).filter(category.type == 'Income').all()
+    form.category.choices = [(c.category, c.category) for c in categories]
+
     if form.validate_on_submit():
         entry = add_incomes(amount=form.amount.data, category=form.category.data, date=form.date.data,  nota=form.nota.data)
         nett = net(amount=(form.amount.data), date=form.date.data, type='Income')
@@ -199,7 +289,7 @@ def add_income():
     
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
     
-    return render_template('add_income.html', title="Add income", form=form, incomes=incomes)
+    return render_template('add_income.html', title="Add income", form=form, incomes=incomes, forms = this_month_table_Form())
 
 
 @app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
@@ -321,6 +411,29 @@ def search():
 
     return render_template('search_result.html', results=results)
 
+@app.route('/search_income')
+def search_income():
+    q = request.args.get('q')
+    
+    if q:
+        results = db.session.query(add_incomes).filter(add_incomes.nota.icontains(q) | add_incomes.amount.icontains(q) | add_incomes.date.icontains(q)| add_incomes.category.icontains(q)| add_incomes.type.icontains(q)).order_by(add_incomes.date.asc()).all()
+    else:
+        results = []
+
+    return render_template('search_income.html', results=results)
+
+@app.route('/search_expense')
+def search_expense():
+    q = request.args.get('q')
+    
+    if q:
+        results = db.session.query(add_expenses).filter(add_expenses.nota.icontains(q) | add_expenses.amount.icontains(q) | add_expenses.date.icontains(q)| add_expenses.category.icontains(q)| add_expenses.type.icontains(q)).order_by(add_expenses.date.asc()).all()
+
+    else:
+        results = []
+
+    return render_template('search_result.html', results=results)
+
     
 @app.route('/tree', methods=['POST', 'GET'])
 def tree():
@@ -351,3 +464,32 @@ def tree():
 
     return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image)
     
+@app.route('/category', methods = ["POST", "GET"])
+def categoryy():
+    form = create_categoryFrom()
+    if form.validate_on_submit():
+        entry = category(category=form.category.data, type=form.type.data)
+        db.session.add(entry)
+        db.session.commit()
+        return redirect(url_for('categoryy'))
+    
+    income = db.session.query(category.category, category.type).filter(category.type == 'Income').all()
+    expense = db.session.query(category.category, category.type).filter(category.type == 'Expense').all()
+    
+    return render_template('category.html', title="Create Category", form=form, income=income, expense=expense)
+
+@app.route('/delete/<string:entry_category>', methods=['POST', 'GET'])
+def delete_category(entry_category):
+
+ 
+    entry = category.query.filter_by(category= entry_category).first()
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash('Deletion was successful', 'success')
+
+    # Determine the page to return to, with a fallback to 'index'
+    next_page = request.args.get('next', '/')
+    
+    # Redirect to the specified page
+    return redirect(next_page)

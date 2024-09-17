@@ -57,7 +57,7 @@
                                 <input type='text' class="input" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
                                 <button type='button' hx-get="/default_table" hx-target="#results">All</button>
                                 <button type='button' hx-get="/this_month_table" hx-target="#results">This month</button>
-                                <button type='button' hx-get="/last_7days_table" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                                <button type='button' hx-get="/last_7days_table_income" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
                                 {{ form.csrf_token() }}
                                         {{ form.month.label(class = "form-control-label") }}
                                         {{ form.month(class = "input is-small") }}⠀
@@ -67,7 +67,6 @@
                                 <button type="submit"  hx-get="/set"  hx-target="#results">Generate table</button>
                             </row>
                         </form>
-
                 </div>
             </div>
 
