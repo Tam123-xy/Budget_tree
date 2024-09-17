@@ -1,0 +1,17 @@
+{% if results %}
+    {% for result in results %}
+    <tr>
+        <th scope="row">{{loop.index}}</th>
+        <td>{{result.date.strftime("%d-%m-%Y")}}</td>
+        <td>{{result.type}}</td>
+        <td>{{result.category }}</td>
+        <td>{{result.nota }}</td>
+        <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(result.amount) }}</span></td>
+        <td><a href="{{ url_for('delete', entry_id = result.id, entry_type=result.type, entry_amount=result.amount, entry_date=result.date.strftime('%Y-%m-%d %H:%M:%S') ,next=url_for('add_income'), type=result.type) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr>
+        <td colspan="4">No results found.</td>
+    </tr>
+{% endif %}

@@ -57,5 +57,14 @@ class month_and_year(db.Model):
         self.month = month
         self.year = year
 
+class category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(20), nullable=False)
+    category = db.Column(db.String(20), nullable=False)
+     
+    def __init__(self,type,category):
+        self.type = type
+        self.category = category
+
 with app.app_context():
     db.create_all()

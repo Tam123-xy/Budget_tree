@@ -1,7 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, DateField, StringField, DecimalField, IntegerField
+from wtforms import SelectField, SubmitField, DateField, StringField, DecimalField, IntegerField, RadioField
 from wtforms.validators import DataRequired, NumberRange, Optional
 from datetime import date
+
+class IncomeForm(FlaskForm):
+    amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
+    # category = SelectField ('Category', validators=[DataRequired()],
+    #                                         choices =[('💰Salary', '💰Salary'),
+    #                                                   ('💵Bonus','💵Bonus'),
+    #                                                   ('💸Allowance','💸Allowance'),
+    #                                                   ('🤑Sideline','🤑Sideline')])
+    category = SelectField ('Category', choices=[], validators=[DataRequired()])
+    date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
+    nota = StringField('Nota (optional)',validators = [Optional()]) 
+    submit = SubmitField('Save')
 
 class ExpenseForm(FlaskForm):
     amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
@@ -14,16 +26,6 @@ class ExpenseForm(FlaskForm):
     nota = StringField('Nota (optional)', validators = [Optional()]) 
     submit = SubmitField('Save')
 
-class IncomeForm(FlaskForm):
-    amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
-    category = SelectField ('Category', validators=[DataRequired()],
-                                            choices =[('💰Salary', '💰Salary'),
-                                                      ('💵Bonus','💵Bonus'),
-                                                      ('💸Allowance','💸Allowance'),
-                                                      ('🤑Sideline','🤑Sideline')])
-    date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
-    nota = StringField('Nota (optional)',validators = [Optional()]) 
-    submit = SubmitField('Save')
 
 class this_month_table_Form(FlaskForm):
     year = IntegerField('Year', validators=[DataRequired(), NumberRange(min=1)])
@@ -60,3 +62,15 @@ class GoalForm(FlaskForm):
                                                       ('12','December')       
                                                       ])
     submit = SubmitField('Save Goal')
+
+
+class create_categoryFrom(FlaskForm):
+    category = StringField('Category',validators = [DataRequired()]) 
+    type =RadioField('Type', choices=[
+        ('Income', 'Income'),
+        ('Expense', 'Expense')   
+        ])
+    submit = SubmitField('Create Category')
+
+
+    

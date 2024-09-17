@@ -1,0 +1,86 @@
+{% extends 'layout.html' %}
+{% block content %}
+   
+    <div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
+        <div class="card card-style mb-2">
+            <div class="card-body">
+                <form action="" method="POST">
+                    {{ form.csrf_token() }}
+                    <fieldset class="form-group">
+                            <legend class="mb-4">Create category</legend>
+                        
+                
+                        <div class="form-group">
+                            {{ form.category.label(class = "form-control-label") }}
+                            {{ form.category(class = "form-control form-control-sm") }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.type.label(class = "form-control-label") }}
+                            {{ form.type(class = "form-control form-control-sm") }}
+                        </div>
+                
+                        <div class="form-group border-bottom pb-3">
+                            {{ form.submit(class="btn btn-outline-info")}}
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Category</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in income %}
+                        <tr>
+                            <th scope="row">{{loop.index}}</th>
+                            <td>{{entry.type}}</td>
+                            <td>{{entry.category }}</td>
+                            <td><a href="{{ url_for('delete_category', entry_category = entry.category, next=url_for('categoryy') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
+                            
+                        </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Category</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in expense %}
+                        <tr>
+                            <th scope="row">{{loop.index}}</th>
+                            <td>{{entry.type}}</td>
+                            <td>{{entry.category }}</td>
+                            <td><a href="{{ url_for('delete_category', entry_category = entry.category, next=url_for('categoryy') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
+                            
+                        </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+    
+{% endblock %}
