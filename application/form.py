@@ -61,6 +61,7 @@ class GoalForm(FlaskForm):
                                                       ('11','November'),
                                                       ('12','December')       
                                                       ])
+    year = IntegerField('Year', validators=[DataRequired(), NumberRange(min=2024, max=2050)])
     submit = SubmitField('Save Goal')
 
 

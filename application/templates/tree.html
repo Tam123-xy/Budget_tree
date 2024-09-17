@@ -6,28 +6,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>Budget Goal</h1>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="alert alert-success">
-                    {{ messages[0][1] }}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        {% if goal %}
-            <h3>Your goal: {{ goal[1] }}</h3>
-            <p>Status: {{ 'Achieved' if goal[2] ==1 else 'Not Achieved Yet' }}</p>
-            <img src="/static/{{ goal[3] }}" class="img-fluid">
-            {% if goal[2] == 0 %}
-                <form method="POST" action="{{ url_for('achieve_goal', goal_id=goal[0]) }}">
-                    <button type="submit" class="btn btn-success">Mark as Achieved</button>
-                </form>
-            {% else %}
-                <p>Congratulations on achieving your goal!</p>
-            {% endif %}
-        {% else %}
 
         <form action="" method="POST">
             {{ form.csrf_token() }}
@@ -35,28 +13,38 @@
                 <div class="form-group">
                     {{ form.amount.label(class="form-control-label") }}
                     {% if form.amount.errors %}
-                    {{ form.amount(class="form-control form-control-sm is-invalid") }}
-                    {% for error in form.amount.errors %}
-                    <div class="invalid-feedback">
-                        <span>{{error}}</span>
-                    </div>
-                    {% endfor %}
+                        {{ form.amount(class="form-control form-control-sm is-invalid") }}
+                        {% for error in form.amount.errors %}
+                            <div class="invalid-feedback">
+                                <span>{{error}}</span>
+                            </div>
+                        {% endfor %}
                     {% else %}
-                    {{ form.amount(class="form-control form-control-sm") }}
+                        {{ form.amount(class="form-control form-control-sm") }}
                     {% endif %}
                 </div>
-        
+
                 <div class="form-group">
                     {{ form.month.label(class = "form-control-label") }}
                     {{ form.month(class = "form-control form-control-sm") }}
                 </div>
-        
+
+                <div class="form-group">
+                    {{ form.year.label(class = "form-control-label") }}
+                    {{ form.year(class = "form-control form-control-sm") }}
+                </div>
+
                 <div class="form-group border-bottom pb-3">
-                    {{ form.submit(class="btn btn-outline-info")}}
+                    {{ form.submit(class="btn btn-outline-info btn-block")}}
                 </div>
             </fieldset>
         </form>
+
+        {% if goal %}
+        <h3>Your goal:RM{{ goal.amount }}</h3>
+        <img src="../static/tree_images/tree1.png" class="img-fluid" alt="Goal Image">
         {% endif %}
+
     </div>
 </body>
 
