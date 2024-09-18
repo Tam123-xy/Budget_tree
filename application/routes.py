@@ -1,7 +1,7 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
 from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryFrom, this_month_table_Form
-from application.models import add_expenses, add_incomes, goal, net, month_and_year, category
+from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case
 import json
 from datetime import datetime, date, timedelta
