@@ -5,11 +5,6 @@ from datetime import date
 
 class IncomeForm(FlaskForm):
     amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
-    # category = SelectField ('Category', validators=[DataRequired()],
-    #                                         choices =[('💰Salary', '💰Salary'),
-    #                                                   ('💵Bonus','💵Bonus'),
-    #                                                   ('💸Allowance','💸Allowance'),
-    #                                                   ('🤑Sideline','🤑Sideline')])
     category = SelectField ('Category', choices=[], validators=[DataRequired()])
     date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
     nota = StringField('Nota (optional)',validators = [Optional()]) 
@@ -17,11 +12,7 @@ class IncomeForm(FlaskForm):
 
 class ExpenseForm(FlaskForm):
     amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
-    category = SelectField ('Category' , validators=[DataRequired()],
-                                            choices  =[('🏡Rent', '🏡Rent'),
-                                                      ('🍴 Food and Beverage','🍴 Food and Beverage'),
-                                                      ('🛍️ Shopping','🛍️ Shopping'),
-                                                      ('🚊 Transport',' 🚊Transport')])
+    category = SelectField ('Category', choices=[], validators=[DataRequired()])
     date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
     nota = StringField('Nota (optional)', validators = [Optional()]) 
     submit = SubmitField('Save')
