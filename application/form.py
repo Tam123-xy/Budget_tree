@@ -7,14 +7,14 @@ class IncomeForm(FlaskForm):
     amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
     category = SelectField ('Category', choices=[], validators=[DataRequired()])
     date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
-    nota = StringField('Nota (optional)',validators = [Optional()]) 
+    nota = StringField('Note (optional)',validators = [Optional()]) 
     submit = SubmitField('Save')
 
 class ExpenseForm(FlaskForm):
     amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
     category = SelectField ('Category', choices=[], validators=[DataRequired()])
     date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
-    nota = StringField('Nota (optional)', validators = [Optional()]) 
+    nota = StringField('Note (optional)', validators = [Optional()]) 
     submit = SubmitField('Save')
 
 
@@ -56,13 +56,14 @@ class GoalForm(FlaskForm):
     submit = SubmitField('Save Goal')
 
 
-class create_categoryFrom(FlaskForm):
+class create_categoryForm(FlaskForm):
     category = StringField('Category',validators = [DataRequired()]) 
     type =RadioField('Type', choices=[
         ('Income', 'Income'),
         ('Expense', 'Expense')   
         ])
     submit = SubmitField('Create Category')
+<<<<<<< HEAD
 
 class CompareForm(FlaskForm):
     month1 = SelectField('Select Month 1', choices=[(i, i) for i in range(1, 13)], coerce=int)
@@ -71,3 +72,7 @@ class CompareForm(FlaskForm):
     year2 = IntegerField('Select Year 2', validators=[DataRequired()])
     submit = SubmitField('Compare')
     
+=======
+    
+
+>>>>>>> main
