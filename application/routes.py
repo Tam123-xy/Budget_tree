@@ -1,11 +1,11 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryFrom, this_month_table_Form
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm, editFrom
 from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case
 import json
 from datetime import datetime, date, timedelta
-import sqlite3
+from sqlalchemy.sql import text
 
 def combine_table(expenses,incomes):
     # Combine the entries
@@ -37,22 +37,35 @@ def combine_table(expenses,incomes):
     entries.sort(key=lambda x: x['date'], reverse=True)
     return entries
 
-# def search_month_year_database():
-#     form = this_month_table_Form()
-#     if form.validate_on_submit():
-#         db.session.query(month_and_year).delete()
-#         db.session.commit()
 
-#         entry = month_and_year(month=form.month.data, year=form.year.data)
-#         db.session.add(entry)
-#         db.session.commit()
+        
+def edit(form,entry_id,entry_type):
+    if form.validate_on_submit():
+        # Update the database with the new form data
+        if entry_type == 'Expense':
+            update_query = text('UPDATE add_expenses SET amount = :amount, date = :date, category = :category, nota = :nota WHERE id = :entry_id')
+        else:
+            update_query = text('UPDATE add_incomes SET amount = :amount, date = :date, category = :category, nota = :nota WHERE id = :entry_id')
+
+        # Execute the update query
+        db.session.execute(update_query, {
+            'amount': form.amount.data,
+            'date': form.date.data.strftime('%Y-%m-%d'),  # Convert date to string format
+            'category': form.category.data,
+            'nota': form.nota.data,
+            'entry_id': entry_id
+        })
+        db.session.commit()
+
+        # Redirect or flash a success message after editing
+        return redirect(url_for('index'))
+            
+    
 
 
 @app.route('/', methods = ["POST", "GET"])
 def index():
    
-    
-    
     # Querying both models
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
@@ -74,31 +87,29 @@ def index():
 
 @app.route('/set_income', methods=['POST','GET'])
 def set_income():
-    latest_entry = db.session.query(month_and_year).first()
-    current_year_month = f'{latest_entry.year}-{int(latest_entry.month):02d}'
-    print(current_year_month)
+    month = request.form.get('month')
+    year = request.form.get('year')
+   
+    current_year_month = f'{year}-{int(month):02d}'
    
     incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
     incomes.sort(key=lambda x: x.date, reverse=True)
 
     return render_template('default_table_income.html',incomes=incomes)
 
+@app.route('/set_expense', methods=['POST','GET'])
+def set_expense():
+    month = request.form.get('month')
+    year = request.form.get('year')
+   
+    current_year_month = f'{year}-{int(month):02d}'
+   
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    expenses.sort(key=lambda x: x.date, reverse=True)
 
-@app.route('/check', methods = ["POST", "GET"])
-def check():
-    form = this_month_table_Form()
-    if form.validate_on_submit():
-        entry = month_and_year(month=form.month.data, year=form.year.data)
-        db.session.add(entry)
-        db.session.commit()
-        flash(f"RM{form.month.data} has been added to expense record", "success")
-        return redirect(url_for('index'))
-    else:
-        print(form.errors) 
+    return render_template('default_table_expense.html',expenses=expenses)
 
-    return render_template('check.html', title="Add expense", form=form )
     
-
 @app.route('/net_all_table')
 def net_all_table():
     sum_expenses = db.session.query(db.func.sum(add_expenses.amount)).all()
@@ -160,8 +171,6 @@ def default_table_expense():
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
 
     return render_template('default_table_expense.html', expenses=expenses)
-
-
 
 @app.route('/this_month_table')
 def this_month_table():
@@ -238,7 +247,6 @@ def last_7days_table_expense():
 
 @app.route('/addexpense', methods = ["POST", "GET"])
 def add_expense():
-    # search_month_year_database()
     form = ExpenseForm()
 
     categories = db.session.query(category.category).filter(category.type == 'Expense').all()
@@ -250,17 +258,18 @@ def add_expense():
         db.session.add(entry)
         db.session.add(nett)
         db.session.commit()
-        flash(f"RM{form.amount.data} has been added to expense record", "success")
-        return redirect(url_for('index'))
+
+        flash(f"RM{form.amount.data} has been added ", "success")
+
+        return redirect(url_for('add_expense'))
     
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
     
-    return render_template('add_expense.html', title="Add expense", form=form, expenses=expenses, forms = this_month_table_Form() )
+    return render_template('add_expense.html', title="Add expense", form=form, expenses=expenses )
     
  
 @app.route('/addincome', methods = ["POST", "GET"])
 def add_income():
-    # search_month_year_database()
     form = IncomeForm()
 
     categories = db.session.query(category.category).filter(category.type == 'Income').all()
@@ -272,44 +281,14 @@ def add_income():
         db.session.add(entry)
         db.session.add(nett)
         db.session.commit()
-        flash(f"RM{form.amount.data} has been added to expense record", "success")
-        return redirect(url_for('index'))
+
+        flash(f"RM{form.amount.data} has been added", "success")
+
+        return redirect(url_for('add_income'))
     
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
     
-    return render_template('add_income.html', title="Add income", form=form, incomes=incomes, forms = this_month_table_Form())
-
-
-@app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
-def delete(entry_id, entry_type, entry_amount, entry_date):
-    # Parse the date string into a datetime object
-    entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
-
-    # Identify if it's an expense or income entry and retrieve the correct entry
-    if entry_type == 'Expense':
-        entry = add_expenses.query.get_or_404(entry_id)
-        
-    else:
-        entry = add_incomes.query.get_or_404(entry_id)
-        
-    if entry_type == 'Expense':
-        ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type=entry_type).first()
-
-    else:
-        ent = net.query.filter_by(amount= entry_amount, date=entry_date, type=entry_type).first()
-
-    # Delete both entries
-    db.session.delete(entry)
-    db.session.delete(ent)
-    db.session.commit()
-
-    flash('Deletion was successful', 'success')
-
-    # Determine the page to return to, with a fallback to 'index'
-    next_page = request.args.get('next', '/')
-    
-    # Redirect to the specified page
-    return redirect(next_page)
+    return render_template('add_income.html', title="Add income", form=form, incomes=incomes)
 
 
 @app.route('/dashboard')
@@ -453,7 +432,7 @@ def tree():
     
 @app.route('/category', methods = ["POST", "GET"])
 def categoryy():
-    form = create_categoryFrom()
+    form = create_categoryForm()
     if form.validate_on_submit():
         entry = category(category=form.category.data, type=form.type.data)
         db.session.add(entry)
@@ -465,21 +444,6 @@ def categoryy():
     
     return render_template('category.html', title="Create Category", form=form, income=income, expense=expense)
 
-@app.route('/delete/<string:entry_category>', methods=['POST', 'GET'])
-def delete_category(entry_category):
-
- 
-    entry = category.query.filter_by(category= entry_category).first()
-    db.session.delete(entry)
-    db.session.commit()
-
-    flash('Deletion was successful', 'success')
-
-    # Determine the page to return to, with a fallback to 'index'
-    next_page = request.args.get('next', '/')
-    
-    # Redirect to the specified page
-    return redirect(next_page)
 
 @app.route('/set', methods=['POST','GET'])
 def set():
@@ -494,6 +458,125 @@ def set():
     entries = combine_table(expenses,incomes)
 
     return render_template('default_table.html',entries=entries)
+
+@app.route('/delete/<string:entry_category>', methods=['POST', 'GET'])
+def delete_category(entry_category):
+
+    entry = category.query.filter_by(category= entry_category).first()
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash('Deletion was successful', 'success')
+
+    # Determine the page to return to, with a fallback to 'index'
+    next_page = request.args.get('next', '/')
+    
+    # Redirect to the specified page
+    return redirect(next_page)
+
+@app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+def delete(entry_id, entry_type, entry_amount, entry_date):
+    # Parse the date string into a datetime object
+    entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+
+    # Identify if it's an expense or income entry and retrieve the correct entry
+    if entry_type == 'Expense':
+        entry = add_expenses.query.get_or_404(entry_id)
+        
+    else:
+        entry = add_incomes.query.get_or_404(entry_id)
+        
+    if entry_type == 'Expense':
+        ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type=entry_type).first()
+
+    else:
+        ent = net.query.filter_by(amount= entry_amount, date=entry_date, type=entry_type).first()
+
+    # Delete both entries
+    db.session.delete(entry)
+    db.session.delete(ent)
+    db.session.commit()
+
+    flash('Deletion was successful', 'success')
+
+    # Determine the page to return to, with a fallback to 'index'
+    next_page = request.args.get('next', '/')
+    
+    # Redirect to the specified page
+    return redirect(next_page)
+
+
+@app.route('/get_record/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+def get_record(entry_id, entry_type, entry_amount, entry_date):
+    entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+    form = editFrom()  # Assuming EditForm is the form for both expense and income
+
+    # Query based on type (Expense or Income)
+    table_name = 'add_expenses' if entry_type == 'Expense' else 'add_incomes'
+    sql_query = text(f'SELECT * FROM {table_name} WHERE id = :entry_id')
+    result = db.session.execute(sql_query, {'entry_id': entry_id}).fetchone()
+
+    # Fetch categories to populate dropdown
+    categories = db.session.query(category.category).filter(category.type == entry_type).all()
+    form.category.choices = [(c.category, c.category) for c in categories]
+
+    # Pre-fill form fields with the fetched result
+    if request.method == 'GET':
+        form.amount.data = result[1]  # Amount field
+        form.date.data = datetime.strptime(result[3], '%Y-%m-%d %H:%M:%S.%f').date()  # Date field
+        form.nota.data = result[5] if len(result) > 4 else ''  # Nota field (optional)
+        form.category.data = result[2]  # Category field
+        
+    if form.validate_on_submit():
+        if entry_type == 'Expense':
+            entry = add_expenses.query.get_or_404(entry_id)
+            db.session.delete(entry)
+           
+            entryy = add_expenses(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
+            db.session.add(entryy)
+
+            db.session.commit()
+
+        else:
+            entry = add_incomes.query.get_or_404(entry_id)
+            db.session.delete(entry)
+            
+
+            entryy = add_incomes(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
+            db.session.add(entryy)
+
+            db.session.commit()
+
+        if entry_type == 'Expense':
+            ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type='Expense').first()
+            db.session.delete(ent)
+
+            nett = net(amount=-abs(form.amount.data), date=form.date.data, type='Expense')
+            db.session.add(nett)
+
+            db.session.commit()
+
+        else:
+            ent = net.query.filter_by(amount= entry_amount, date=entry_date, type='Income').first()
+            db.session.delete(ent)
+
+            nett = net(amount=(form.amount.data), date=form.date.data, type='Income')
+            db.session.add(nett)
+
+            db.session.commit()
+
+        return redirect(url_for('index'))
+
+    return render_template('edit.html', form=form)
+
+        
+    
+
+
+
+    
+
+
     
     
 

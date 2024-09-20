@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Entry</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Entry</h2>
+
+        <form action="" method="POST">
+            {{ form.hidden_tag() }}
+          
+              <div class="form-group">
+                    {{ form.amount.label }} 
+                    {{ form.amount(class="form-control") }}  
+              </div>
+
+              <div class="form-group">
+                    {{ form.category.label }} 
+                    {{ form.category(class="form-control") }} 
+              </div>
+
+              <div class="form-group">
+                    {{ form.date.label }} 
+                    {{ form.date(class="form-control") }}  
+              </div>
+
+              <div class="form-group">
+                    {{ form.nota.label }} 
+                    {{ form.nota(class="form-control") }} 
+                </div>
+
+                <div class="form-group border-bottom pb-3">
+                    {{ form.submit(class="btn btn-outline-info")}}
+              </div>
+
+        </form>
+      </div>
+</body>
+</html>
