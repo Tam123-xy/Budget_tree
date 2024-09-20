@@ -1,7 +1,7 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, this_month_table_Form, create_categoryFrom
-from application.models import add_expenses, add_incomes, goal, net, month_and_year, category
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryFrom, this_month_table_Form
+from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case
 import json
 from datetime import datetime, date, timedelta
@@ -37,21 +37,21 @@ def combine_table(expenses,incomes):
     entries.sort(key=lambda x: x['date'], reverse=True)
     return entries
 
-def search_month_year_database():
-    form = this_month_table_Form()
-    if form.validate_on_submit():
-        db.session.query(month_and_year).delete()
-        db.session.commit()
+# def search_month_year_database():
+#     form = this_month_table_Form()
+#     if form.validate_on_submit():
+#         db.session.query(month_and_year).delete()
+#         db.session.commit()
 
-        entry = month_and_year(month=form.month.data, year=form.year.data)
-        db.session.add(entry)
-        db.session.commit()
+#         entry = month_and_year(month=form.month.data, year=form.year.data)
+#         db.session.add(entry)
+#         db.session.commit()
 
 
 @app.route('/', methods = ["POST", "GET"])
 def index():
    
-    search_month_year_database()
+    
     
     # Querying both models
     expenses = add_expenses.query.order_by(add_expenses.date.desc()).all()
@@ -69,20 +69,8 @@ def index():
 
     net = [round(sum_income[0] - sum_expense[0], 2)]
 
-    return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net, form = this_month_table_Form())
+    return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net)
 
-@app.route('/set', methods=['POST','GET'])
-def set():
-    latest_entry = db.session.query(month_and_year).first()
-    current_year_month = f'{latest_entry.year}-{int(latest_entry.month):02d}'
-    print(current_year_month)
-   
-    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
-    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
-
-    entries = combine_table(expenses,incomes)
-
-    return render_template('default_table.html',entries=entries)
 
 @app.route('/set_income', methods=['POST','GET'])
 def set_income():
@@ -250,7 +238,7 @@ def last_7days_table_expense():
 
 @app.route('/addexpense', methods = ["POST", "GET"])
 def add_expense():
-    search_month_year_database()
+    # search_month_year_database()
     form = ExpenseForm()
 
     categories = db.session.query(category.category).filter(category.type == 'Expense').all()
@@ -272,7 +260,7 @@ def add_expense():
  
 @app.route('/addincome', methods = ["POST", "GET"])
 def add_income():
-    search_month_year_database()
+    # search_month_year_database()
     form = IncomeForm()
 
     categories = db.session.query(category.category).filter(category.type == 'Income').all()
@@ -440,14 +428,18 @@ def tree():
     form = GoalForm()
 
     if form.validate_on_submit():
-        goal_amount = form.amount.data if form.amount.data else 0  # Set amount = 0 if user doesn't enter a value
+        goal_amount = form.amount.data if form.amount.data else 0 # set amount = 0 if user doesnt enter a value
         entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
         db.session.add(entry)
         db.session.commit()
         return redirect(url_for('tree'))
-
-    # Fetch the latest goal from the database
+    
+     # Fetch the latest goal from the database
     current_goal = db.session.query(goal).order_by(goal.id.desc()).first()
+    
+    # Decide which image to display based on current progress
+    goal_amount = 100  # Your goal amount, or fetch it from the database
+    image = "../static/tree_images/tree1.png"  # Default image
 
     if current_goal:
         month = current_goal.month
@@ -519,3 +511,22 @@ def delete_category(entry_category):
     
     # Redirect to the specified page
     return redirect(next_page)
+
+@app.route('/set', methods=['POST','GET'])
+def set():
+    month = request.form.get('month')
+    year = request.form.get('year')
+   
+    current_year_month = f'{year}-{int(month):02d}'
+   
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+
+    entries = combine_table(expenses,incomes)
+
+    return render_template('default_table.html',entries=entries)
+    
+    
+
+
+

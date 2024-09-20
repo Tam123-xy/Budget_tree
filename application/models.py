@@ -57,14 +57,14 @@ class net(db.Model):
         self.date = date
         self.type = type
 
-class month_and_year(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    month = db.Column(db.Integer, nullable=False)
-    year = db.Column(db.Integer, nullable=False)
+# class month_and_year(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     month = db.Column(db.Integer, nullable=False)
+#     year = db.Column(db.Integer, nullable=False)
      
-    def __init__(self,month,year):
-        self.month = month
-        self.year = year
+#     def __init__(self,month,year):
+#         self.month = month
+#         self.year = year
 
 class category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
