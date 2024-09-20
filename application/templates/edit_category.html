@@ -16,27 +16,17 @@
               <form action="" method="POST">
                 {{ form.hidden_tag() }}
                 <fieldset class="form-group">
-                  <legend class="mb-4">Edit</legend>
+                  <legend class="mb-4">Edit Category</legend>
              
               
                   <div class="form-group">
-                        {{ form.amount.label }} 
-                        {{ form.amount(class="form-control") }}  
-                  </div>
-    
-                  <div class="form-group">
                         {{ form.category.label }} 
-                        {{ form.category(class="form-control") }} 
+                        {{ form.category(class="form-control") }}  
                   </div>
     
                   <div class="form-group">
-                        {{ form.date.label }} 
-                        {{ form.date(class="form-control") }}  
-                  </div>
-    
-                  <div class="form-group">
-                        {{ form.nota.label }} 
-                        {{ form.nota(class="form-control") }} 
+                        {{ form.type.label }} 
+                        {{ form.type(class="form-control") }} 
                   </div>
     
                   <div class="form-group border-bottom pb-3">

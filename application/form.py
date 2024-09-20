@@ -64,11 +64,4 @@ class create_categoryForm(FlaskForm):
         ])
     submit = SubmitField('Create Category')
     
-class editFrom(FlaskForm):
-    amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
-    category = SelectField ('Category', choices=[], validators=[DataRequired()])
-    date = DateField('Date', format='%Y-%m-%d',default=date.today,  validators = [DataRequired()])
-    nota = StringField('Nota (optional)',validators = [Optional()]) 
-    submit = SubmitField('Done edit')
 
-    
