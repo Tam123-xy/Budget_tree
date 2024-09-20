@@ -1,6 +1,6 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryFrom, this_month_table_Form
 from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case
 import json
@@ -459,7 +459,7 @@ def tree():
         if goal_amount > 0:  # Avoid division by zero
             progress = (current_saving / goal_amount) * 100
             if progress >= 100:
-                image = "tree_images/tree_goal.png"  # Goal achieved
+                image = "tree_images/tree_goal.jpg"  # Goal achieved
             elif progress >= 67:
                 image = "tree_images/tree3.png"  # More than 66% progress
             elif progress >= 34:
@@ -647,7 +647,26 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
 
 
     
-    
+@app.route('/compare', methods=['GET', 'POST'])
+def compare():
+    form = CompareForm()
+    month1_data, month2_data = None, None
 
+    if form.validate_on_submit():
+        # Get the form data (the two months and years to compare)
+        month1 = form.month1.data
+        year1 = form.year1.data
+        month2 = form.month2.data
+        year2 = form.year2.data
+
+        # Query the database for the first month and year
+        month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
+
+        # Query the database for the second month and year
+        month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
+
+        return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
+
+    return render_template('compare_goal.html', form=form)
 
 
