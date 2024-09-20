@@ -1,6 +1,6 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryFrom, this_month_table_Form
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm, this_month_table_Form, CompareForm
 from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case
 import json
@@ -419,18 +419,18 @@ def tree():
     form = GoalForm()
 
     if form.validate_on_submit():
-        goal_amount = form.amount.data if form.amount.data else 0 # set amount = 0 if user doesnt enter a value
+        goal_amount = form.amount.data if form.amount.data else 0  # Set amount = 0 if user doesn't enter a value
         entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
         db.session.add(entry)
         db.session.commit()
         return redirect(url_for('tree'))
     
-     # Fetch the latest goal from the database
+    # Fetch the latest goal from the database
     current_goal = db.session.query(goal).order_by(goal.id.desc()).first()
     
     # Decide which image to display based on current progress
     goal_amount = 100  # Your goal amount, or fetch it from the database
-    image = "../static/tree_images/tree1.png"  # Default image
+    image = "tree_images/tree1.png"  # Default image
 
     if current_goal:
         month = current_goal.month
@@ -471,7 +471,8 @@ def tree():
         current_saving = 0
         image = "tree_images/tree1.png"  # Default image if no goal exists
 
-    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image)
+    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving)
+
     
 @app.route('/category', methods = ["POST", "GET"])
 def categoryy():
@@ -510,7 +511,7 @@ def edit_category(entry_category,entry_type):
     sql_query = text('SELECT * FROM category WHERE type = :entry_type AND category = :entry_category')
     result = db.session.execute(sql_query, {'entry_type': entry_type, 'entry_category': entry_category}).fetchone()
 
-    # Pre-fill form fields with the fetched result
+    # Pre-fill form fields with the festched result
     if request.method == 'GET':
         form.type.data = result[1]  
         form.category.data = result[2]  
@@ -638,15 +639,6 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     # Redirect to the specified page
     return redirect(next_page)
 
-        
-    
-
-
-
-    
-
-
-    
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
     form = CompareForm()
