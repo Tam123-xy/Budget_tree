@@ -7,102 +7,115 @@
 </head>
 </head>
 
-<div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
-    <div class="card card-style mb-2">
-        <div class="card-body">
-            <form action="" method="POST">
-                {{ form.csrf_token() }}
-                <fieldset class="form-group">
-                        <legend class="mb-4">Add Income</legend>
-                    <div class="form-group">
-                        {{ form.amount.label(class="form-control-label") }}
-                        {% if form.amount.errors %}
-                        {{ form.amount(class="form-control form-control-sm is-invalid") }}
-                        {% for error in form.amount.errors %}
-                        <div class="invalid-feedback">
-                            <span>{{error}}</span>
+    <div class="col-xs-8 col-sm-4 col-md-4 col-lg-3 ml-auto mr-auto">
+        <div class="card card-style mb-2">
+            <div class="card-body">
+                <form action="" method="POST">
+                    {{ form.csrf_token() }}
+                    <fieldset class="form-group">
+                            <legend class="mb-4">Add Income</legend>
+                        <div class="form-group">
+                            {{ form.amount.label(class="form-control-label") }}
+                            {% if form.amount.errors %}
+                            {{ form.amount(class="form-control form-control-sm is-invalid") }}
+                            {% for error in form.amount.errors %}
+                            <div class="invalid-feedback">
+                                <span>{{error}}</span>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            {{ form.amount(class="form-control form-control-sm") }}
+                            {% endif %}
                         </div>
-                        {% endfor %}
-                        {% else %}
-                        {{ form.amount(class="form-control form-control-sm") }}
-                        {% endif %}
-                    </div>
-            
-                    <div class="form-group">
-                        {{ form.category.label(class = "form-control-label") }}
-                        {{ form.category(class = "form-control form-control-sm") }}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form.nota.label(class = "form-control-label") }}
-                        {{ form.nota(class = "form-control form-control-sm") }}
-                    </div>
-            
-                    <div class="form-group">
-                        {{ form.date.label(class = "form-control-label") }}
-                        {{ form.date(class = "form-control form-control-sm") }}
-                    </div>
-            
-                    <div class="form-group border-bottom pb-3">
-                        {{ form.submit(class="btn btn-outline-info")}}
-                    </div>
-                </fieldset>
-            </form>
+                
+                        <div class="form-group">
+                            {{ form.category.label(class = "form-control-label") }}
+                            {{ form.category(class = "form-control form-control-sm") }}
+                        </div>
+    
+                        <div class="form-group">
+                            {{ form.nota.label(class = "form-control-label") }}
+                            {{ form.nota(class = "form-control form-control-sm") }}
+                        </div>
+                
+                        <div class="form-group">
+                            {{ form.date.label(class = "form-control-label") }}
+                            {{ form.date(class = "form-control form-control-sm") }}
+                        </div>
+                
+                        <div class="form-group border-bottom pb-3">
+                            {{ form.submit(class="btn btn-outline-info")}}
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-
-
-<div class="col-sm-10 ml-auto mr-auto ">
-    <section class="section"></section>
-        <div class="columns">
-            <div class="column is-one-third is-offset-one-third">
-                    <form action="" method="POST">
+    
+    
+    <div class="col-sm-10 ml-auto mr-auto ">
+        <section class="section">
+            <div class="columns">
+                <div class="column is-one-third is-offset-one-third">
+                    <form hx-post="/set_income" hx-target="#results" hx-swap="innerHTML">
                         <row>
                             <input type='text' class="input" placeholder="Search" name="q" hx-get="/search_income" hx-trigger="keyup changed delay:500ms" hx-target="#results">
                             <button type='button' hx-get="/default_table_income" hx-target="#results">All</button>
                             <button type='button' hx-get="/this_month_table_income" hx-target="#results">This month</button>
-                            <button type='button' hx-get="/last_7days_table_income" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-                            {{ forms.csrf_token() }}
-                                    {{ forms.month.label(class = "form-control-label") }}
-                                    {{ forms.month(class = "input is-small") }}⠀
-                                    {{ forms.year.label(class = "form-control-label") }}
-                                    {{ forms.year(class = "input is-small", style="width: 70px;") }}
-                                    {{ forms.submit(class = "input is-small") }}
-                            <button type="submit"  hx-get="/set_income"  hx-target="#results">Generate table</button>
+                            <button type='button' hx-get="/last_7days_table_income" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                            <label for="month">Month:</label>
+                            <select name="month" id="month" multiple>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <label for="year">Year:</label>
+                            <input type="number" id="year" name="year" class="input is-small", style="width: 70px;" required>
+                            <button type="submit" class="input is-small">Generate table</button>
                         </row>
-                    </form>
+                    </form>  
+                </div>
             </div>
-        </div>
-
-        <table class="table">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">No</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Note</th>
-                    <th scope="col">Amount</th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody id="results">
-                {% for entry in incomes %}
-                        <tr>
-                            <th scope="row">{{loop.index}}</th>
-                            <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
-                            <td>{{entry.type}}</td>
-                            <td>{{entry.category }}</td>
-                            <td>{{entry.nota }}</td>
-                            <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
-                            <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type=entry.type, entry_amount=entry.amount, entry_date=entry.date.strftime('%Y-%m-%d %H:%M:%S') ,next=url_for('add_income') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
-                            <td><a class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil"></i></a></td>
-                        </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
-</div>
-{% endblock %}
+    
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">No</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Note</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody id="results">
+                    {% for entry in incomes %}
+                            <tr>
+                                <th scope="row">{{loop.index}}</th>
+                                <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
+                                <td>{{entry.type}}</td>
+                                <td>{{entry.category }}</td>
+                                <td>{{entry.nota }}</td>
+                                <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
+                                <td><a href="{{ url_for('get_record', entry_id=entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_income')) }}"   class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
+                                <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_income')) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
+                              
+                            </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+    {% endblock %}
+    

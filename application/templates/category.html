@@ -4,8 +4,9 @@
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-   
-    <div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
+
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    <div class="col-xs-8 col-sm-4 col-md-4 col-lg-3 ml-auto mr-auto">
         <div class="card card-style mb-2">
             <div class="card-body">
                 <form action="" method="POST">
@@ -33,13 +34,17 @@
         </div>
     </div>
 
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 
-    <div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
+
+    <div class="col-xs-8 col-sm-4 col-md-4 ml-auto mr-auto">
+        <center>
+                <H2>Income category </H2>
+        </center>
         <table class="table">
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">No</th>
-                    <th scope="col">Type</th>
                     <th scope="col">Category</th>
                     <th scope="col"></th>
                     <th scope="col"></th>
@@ -49,22 +54,24 @@
                 {% for entry in income %}
                         <tr>
                             <th scope="row">{{loop.index}}</th>
-                            <td>{{entry.type}}</td>
                             <td>{{entry.category }}</td>
-                            <td><a href="{{ url_for('delete_category', entry_category = entry.category, next=url_for('categoryy') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
-                            <td><a class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil"></i></a></td>
+                            <td><a href="{{ url_for('edit_category', entry_category = entry.category, entry_type = 'Income' ) }}"   class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
+                            <td><a href="{{ url_for('delete_category', entry_category = entry.category,entry_type = 'Income' ) }}"  class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
+
                         </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <div class="col-xs-10 col-sm-6 col-md-6 ml-auto mr-auto">
-        <table class="table">
+    <div class="col-xs-8 col-sm-4 col-md-4 ml-auto mr-auto">
+        <center>
+            <H2>Expense category </H2>
+        </center>
+        <table class="table" >
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">No</th>
-                    <th scope="col">Type</th>
                     <th scope="col">Category</th>
                     <th scope="col"></th>
                     <th scope="col"></th>
@@ -74,20 +81,13 @@
                 {% for entry in expense %}
                         <tr>
                             <th scope="row">{{loop.index}}</th>
-                            <td>{{entry.type}}</td>
                             <td>{{entry.category }}</td>
-                            <td><a href="{{ url_for('delete_category', entry_category = entry.category, next=url_for('categoryy') ) }}"  class="btn btn-outline-danger btn-sm">Delete</a></td>
-                            <td><a class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil"></i></a></td>
-                            
+                            <td><a href="{{ url_for('edit_category', entry_category = entry.category, entry_type = 'Expense' ) }}"   class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
+                            <td><a href="{{ url_for('delete_category', entry_category = entry.category,entry_type = 'Expense' ) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
                         </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-
-
-
-
-
     
 {% endblock %}
