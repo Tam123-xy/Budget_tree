@@ -419,81 +419,60 @@ def tree():
     form = GoalForm()
 
     if form.validate_on_submit():
+        goal_amount = form.amount.data if form.amount.data else 0 # set amount = 0 if user doesnt enter a value
         entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
         db.session.add(entry)
         db.session.commit()
         return redirect(url_for('tree'))
     
      # Fetch the latest goal from the database
-    current_goal = db.session.query(goal.amount).order_by(goal.id.desc()).first()
+    current_goal = db.session.query(goal).order_by(goal.id.desc()).first()
     
     # Decide which image to display based on current progress
     goal_amount = 100  # Your goal amount, or fetch it from the database
     image = "../static/tree_images/tree1.png"  # Default image
 
     if current_goal:
-        current_amount = current_goal.amount
-        if current_amount >= goal_amount:
-            image = "../static/tree_images/tree_goal.png"
-        elif current_amount >= goal_amount / 2:
-            image = "../static/tree_images/tree3.png"
-        elif current_amount > 0:
-            image = "../static/tree_images/tree2.png"
+        month = current_goal.month
+        year = current_goal.year
+
+        current_year_month = f'{year}-{int(month):02d}'
+
+        sum_income = db.session.query(
+            db.func.sum(add_incomes.amount)
+        ).filter(
+            func.strftime('%Y-%m', add_incomes.date) == current_year_month
+        ).scalar() or 0  # Ensure it returns 0 if no result
+
+        sum_expense = db.session.query(
+            db.func.sum(add_expenses.amount)
+        ).filter(
+            func.strftime('%Y-%m', add_expenses.date) == current_year_month
+        ).scalar() or 0  # Ensure it returns 0 if no result
+
+        current_saving = sum_income - sum_expense
+
+        # Set default image
+        image = "tree_images/tree1.png"
+        goal_amount = current_goal.amount
+
+        if goal_amount > 0:  # Avoid division by zero
+            progress = (current_saving / goal_amount) * 100
+            if progress >= 100:
+                image = "tree_images/tree_goal.png"  # Goal achieved
+            elif progress >= 67:
+                image = "tree_images/tree3.png"  # More than 66% progress
+            elif progress >= 34:
+                image = "tree_images/tree2.png"  # Between 34% and 66% progress
+            else:
+                image = "tree_images/tree1.png"  # Less than 34% progress
+
+    else:
+        current_saving = 0
+        image = "tree_images/tree1.png"  # Default image if no goal exists
 
     return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image)
     
-
-@app.route('/set', methods=['POST','GET'])
-def set():
-
-    # Get the month and year which are setted by user, transfer into year-month format
-    month = request.form.get('month')
-    year = request.form.get('year')
-    current_year_month = f'{year}-{int(month):02d}'
-   
-   # Query add_incomes models with the condition of the year-month
-    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
-    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
-
-    # Combine the results of query
-    entries = combine_table(expenses,incomes)
-
-    return render_template('default_table.html',entries=entries)
-
-
-@app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
-def delete(entry_id, entry_type, entry_amount, entry_date):
-
-    # Parse the date string into a datetime object
-    entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
-
-    # Identify the data is from add_expenses model or add_incomes model, and delete it from its model by its id
-    if entry_type == 'Expense':
-        entry = add_expenses.query.get_or_404(entry_id)
-        
-    else:
-        entry = add_incomes.query.get_or_404(entry_id)
-        
-    # Identify the data of type is income or expense, delete it from net model with the codition of amount, hence the expense amount must be in negative form
-    if entry_type == 'Expense':
-        ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type=entry_type).first()
-
-    else:
-        ent = net.query.filter_by(amount= entry_amount, date=entry_date, type=entry_type).first()
-
-    # Delete 
-    db.session.delete(entry)
-    db.session.delete(ent)
-    db.session.commit()
-
-    flash('Deletion was successful', 'success')
-
-    # Determine the page to return to, with a fallback to 'index'
-    next_page = request.args.get('next', '/')
-    
-    # Redirect to the specified page
-    return redirect(next_page)
-
 @app.route('/category', methods = ["POST", "GET"])
 def categoryy():
     form = create_categoryForm()
