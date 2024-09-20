@@ -607,6 +607,37 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     return render_template('edit.html', form=form)
 
+@app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+def delete(entry_id, entry_type, entry_amount, entry_date):
+    # Parse the date string into a datetime object
+    entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+
+    # Identify if it's an expense or income entry and retrieve the correct entry
+    if entry_type == 'Expense':
+        entry = add_expenses.query.get_or_404(entry_id)
+        
+    else:
+        entry = add_incomes.query.get_or_404(entry_id)
+        
+    if entry_type == 'Expense':
+        ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type=entry_type).first()
+
+    else:
+        ent = net.query.filter_by(amount= entry_amount, date=entry_date, type=entry_type).first()
+
+    # Delete both entries
+    db.session.delete(entry)
+    db.session.delete(ent)
+    db.session.commit()
+
+    flash('Deletion was successful', 'success')
+
+    # Determine the page to return to, with a fallback to 'index'
+    next_page = request.args.get('next', '/')
+    
+    # Redirect to the specified page
+    return redirect(next_page)
+
         
     
 
