@@ -1,0 +1,101 @@
+from flask import Flask, render_template, redirect, url_for, flash
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+import sqlite3
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'goal'
+
+IMAGES = [
+    "../static/tree_images/tree1.png", # 0-33% progress
+    "../static/tree_images/tree2.png", # 34-66% progress
+    "../static/tree_images/tree3.png", # 67-99% progress
+    "../static/tree_images/tree_goal.jpg" # 100% progress (goal achieved)
+]
+
+#initialize database and create the table if it doesn't exist
+def init_db():
+    with sqlite3.connect('goals.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS goals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                amount REAL NOT NULL,
+                month INTEGER NOT NULL,
+                year INTEGER NOT NULL
+            )
+        ''')
+        conn.commit()
+
+def save_goal(goal, goal_amount):
+    with sqlite3.connect('goals.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO goals (goal, current_savings, goal_amount, image, achieved) VALUES (?, ?, ?, ?, ?)',
+                       (goal, 0, goal_amount, IMAGES[0], 0))
+        conn.commit()
+
+def update_savings(goal_id, amount_saved):
+    with sqlite3.connect('goals.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT current_savings, goal_amount FROM goals WHERE id = ?', (goal_id,))
+        current_savings, goal_amount = cursor.fetchone()
+
+        # Update the current savings
+        new_savings = current_savings + amount_saved
+
+        # Calculate the percentage of the goal reached
+        percentage = new_savings / goal_amount
+
+        # Select image based on progress
+        if percentage >= 1:
+            new_image = IMAGES[3]  # Goal reached image
+            achieved = 1
+        elif percentage >= 0.67:
+            new_image = IMAGES[2]  # Third image
+        elif percentage >= 0.34:
+            new_image = IMAGES[1]  # Second image
+        else:
+            new_image = IMAGES[0]  # First image
+
+        # Update the database with new savings and image
+        cursor.execute('UPDATE goals SET current_savings = ?, image = ?, achieved = ? WHERE id = ?', 
+                       (new_savings, new_image, achieved if percentage >= 1 else 0, goal_id))
+        conn.commit()
+
+#fetch the current goal from the database
+def get_goal():
+    with sqlite3.connect('goals.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, goal, progress, image')
+        return cursor.fetchone()
+    
+class GoalForm(FlaskForm):
+    goal = StringField('Enter your goal', validators=[DataRequired()])
+    submit = SubmitField('Save Goal')
+
+@app.route('/', methods=['GET', 'POST'])
+def tree():
+    form = GoalForm()
+
+    if form.validate_on_submit():
+        goal = form.goal.data
+        save_goal(goal_text)
+        flash('Goal saved successfully!', 'success')
+        
+        return redirect(url_for('tree'))
+    
+    # fetch the current goal to display after saving
+    current_goal = get_goal()
+    if current_goal:
+        goal_text = current_goal[1]
+        image = current_goal[3] or '../static/tree_images/tree1.png'
+    else:
+        goal_text = "No goal set"
+        image = '../static/tree_images/tree1.png'
+    
+    return render_template('tree.html', form=form, goal=current_goal, image=image)
+
+if __name__ == '__main__':
+    init_db()
+    app.run(debug=True)

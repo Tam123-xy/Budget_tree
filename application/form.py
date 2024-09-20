@@ -64,5 +64,10 @@ class create_categoryFrom(FlaskForm):
         ])
     submit = SubmitField('Create Category')
 
-
+class CompareForm(FlaskForm):
+    month1 = SelectField('Select Month 1', choices=[(i, i) for i in range(1, 13)], coerce=int)
+    year1 = IntegerField('Select Year 1', validators=[DataRequired()])
+    month2 = SelectField('Select Month 2', choices=[(i, i) for i in range(1, 13)], coerce=int)
+    year2 = IntegerField('Select Year 2', validators=[DataRequired()])
+    submit = SubmitField('Compare')
     
