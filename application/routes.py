@@ -613,17 +613,20 @@ def tree():
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if goal_amount == 0 :
+        progress = 0
         image = "tree_images/tree1.png" 
 
     else:  # Avoid division by zero
         progress = (current_saving / goal_amount) * 100
+        print(f'Progress: {progress}%')
+
         if progress <= 25:
             image = "tree_images/tree1.png"
         
-        elif progress <= 50:
+        elif progress <= 60:
             image = "tree_images/tree2.png"
 
-        elif progress <=75:
+        elif progress <=99:
             image = "tree_images/tree3.png"
 
         else:
@@ -649,7 +652,7 @@ def tree():
     
    
 
-    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving)
+    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving, progress=progress)
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
