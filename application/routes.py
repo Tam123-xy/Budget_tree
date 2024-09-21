@@ -577,110 +577,57 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     # Redirect to the specified page
     return redirect(next_page)
 
+
 @app.route('/tree', methods=['POST', 'GET'])
 def tree():
-    form = GoalForm()
-    image = "tree_images/tree1.png"  # Default image
-    current_saving = 0
-    goal_amount = 0
+    form= GoalForm()
 
     # Get the current month and year, transfer into year-month format
     year = datetime.now().year
     month = datetime.now().month
     current_year_month = f'{year}-{int(month):02d}'
 
-    # Query for the current month's goal
+    # Query this goal model with condition of current month and year
     current_goal = goal.query.filter_by(month=month, year=year).first()
+    print(current_goal)
 
-    if current_goal is None:
-        # Display a default image if no goal is set for the month
-        image = "tree_images/tree2.png"
+    if current_goal:
+        goal_amount = current_goal.amount 
+
     else:
-        print(current_goal.amount)  # Debugging line to check the goal amount
+        goal_amount = 0
 
-        # Query for the total savings for the current month
-        sql_query = text("""
-            SELECT SUM(amount) 
-            FROM net 
-            WHERE strftime('%Y-%m', date) = :current_year_month
-        """)
-        result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
+    print(f'goal_amount{goal_amount}')
 
-        if result:
-            current_saving = result[0] if result[0] is not None else 0
+    # Query this month total saving
+    sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
+    result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
 
-        # Get the goal amount, ensuring it's not None
-        goal_amount = current_goal.amount if current_goal.amount is not None else 0
+    if result:
+        current_saving = result[0]
 
-        # Avoid division by zero if the goal amount is 0
-        if goal_amount == 0:
+    else:
+        current_saving = 0
+
+    print(f'current_saving{current_saving}')
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if goal_amount == 0 :
+        image = "tree_images/tree1.png" 
+
+    else:  # Avoid division by zero
+        progress = (current_saving / goal_amount) * 100
+        if progress <= 25:
             image = "tree_images/tree1.png"
+        
+        elif progress <= 50:
+            image = "tree_images/tree2.png"
+
+        elif progress <=75:
+            image = "tree_images/tree3.png"
+
         else:
-            # Calculate percentage of savings towards the goal
-            saving_percentage = (current_saving / goal_amount) * 100
-
-            # Assign the appropriate image based on the percentage of savings
-            if saving_percentage <= 25:
-                image = "tree_images/tree1.png"
-            elif saving_percentage <= 50:
-                image = "tree_images/tree2.png"
-            elif saving_percentage <= 75:
-                image = "tree_images/tree3.png"
-            elif saving_percentage <= 100:
-                image = "tree_images/tree_goal.jpg"  # Goal achieved
-
-    # Return the rendered template with all the necessary variables
-    
-# @app.route('/tree', methods=['POST', 'GET'])
-# def tree():
-#     form = GoalForm()
-#     image = "tree_images/tree1.png" 
-#     current_saving = 0
-#     goal_amount = 0
-
-#      # Get the current month and year, transfer into year-month format
-#     year = datetime.now().year
-#     month = datetime.now().month
-#     current_year_month = f'{year}-{int(month):02d}'
-
-#     # Query this data with condition of current month and year
-#     current_goal = goal.query.filter_by(month=month, year=year).first()
-    
-#     # Display default picture before set this month goal 
-#     if current_goal is None:  
-#         image = "tree_images/tree2.png"
-
-#     else:
-#         print(current_goal.amount)
-
-#         # Query this month total saving
-#         sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
-#         result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
-
-#         if result:
-#             current_saving = result[0] if result[0] is not None else 0
-
-#         # Set default image
-#         # image = "tree_images/tree1.png"
-#         goal_amount = current_goal.amount if current_goal.amount is not None else 0
-
-#         # Avoid division by zero when goal_amount is 0
-#     if goal_amount == 0:
-#         image = "tree_images/tree1.png"
-#     else:
-#         # Calculate percentage of savings towards goal
-#         saving_percentage = (current_saving / goal_amount) * 100
-
-#         # Assign the appropriate image based on the percentage of savings
-#         if saving_percentage <= 25:
-#             image = "tree_images/tree1.png"
-#         elif saving_percentage <= 50:
-#             image = "tree_images/tree2.png"
-#         elif saving_percentage <= 75:
-#             image = "tree_images/tree3.png"
-#         elif saving_percentage <= 100:
-#             image = "tree_images/tree_goal.jpg"  # Goal achieved
-
+            image = "tree_images/tree_goal.jpg" 
 
     if form.validate_on_submit():
 
