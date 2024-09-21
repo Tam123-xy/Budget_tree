@@ -40,13 +40,15 @@
     </div>
 </div>
             
-<div class="container">
-    <h3>Your goal for this month :RM{{ goal.amount }}</h3>
-    <h3>Your current saving for this month :RM{{ net_monthly_table }}</h3>
-    {% if progres %}
-    <h3>Progress :{{ progres }} %</h3>
-    {% endif %}
-    <img src="{{ url_for('static', filename=image) }}" class="img-fluid">
-</div>
+        <div class="container">
+            <h3>Your goal for this month :RM{{ goal.amount }}</h3>
+            <h3>Your current saving for this month :RM{{ net_monthly_table }}</h3>
+            {% if progres %}
+            <h3>Progress :{{ progres|round(2) }} %</h3>
+            {% endif %}
+        </div>
+        
+    </div>
+</body>
 
 {% endblock %}

@@ -1,39 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
 
-
-<div class="col-xs-12 col-sm-12 col-md-12">
-  <form class="form-inline" action="{{ url_for('dashboard') }}" method="GET">
-    <div class="form-group mb-2">
-      <input type="number" min="1" max="5000" style="width: 150px;"
-             class="form-control" name="year" placeholder="Select Year">
-    </div>
-    <div class="form-group mx-sm-3 mb-2">
-      <select id="month" class="form-control" style="width: 150px;" name="month">
-        <option value=""></option>
-        <option value="01">January</option>
-        <option value="02">February</option>
-        <option value="03">March</option>
-        <option value="04">April</option>
-        <option value="05">May</option>
-        <option value="06">June</option>
-        <option value="07">July</option>
-        <option value="08">August</option>
-        <option value="09">September</option>
-        <option value="10">October</option>
-        <option value="11">November</option>
-        <option value="12">December</option>
-      </select>
-    </div>
-    <button type="submit" class="btn btn-primary mb-2">Filter</button>
-  </form>
-</div>
-
 <div class="col-xs-10 col-sm-6 col-md-6">
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="income_vs_expense"></canvas>
+                <canvas id="income_vs_expense_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -43,7 +15,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="expenses_over_time"></canvas>
+                <canvas id="expenses_over_time_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -53,7 +25,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="income_category"></canvas>
+                <canvas id="income_category_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -63,7 +35,7 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="incomes_over_time"></canvas>
+                <canvas id="incomes_over_time_monthly"></canvas>
             </div>
         </div>
     </div>
@@ -73,37 +45,44 @@
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
-                <canvas id="expenses_category"></canvas>
+                <canvas id="expenses_category_monthly"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+<section class="section"></section>
+    <div class="columns">
+        <div class="column is-one-third is-offset-one-third">
+            <button type='monthly' hx-get="/monthly_charts" hx-target="#net_table">Months</button>
+        </div>
+    </div>
+
+
 
 <!-- -------------------------------- -->
 
 {% block javascript %}
 <script>
-    function applyMonthFilter() {
-      const month = document.getElementById('monthFilter').value;
-      const year = document.getElementById('yearFilter').value;
-      filterDataByMonth(parseInt(month), parseInt(year));
+    new DataTable('#net_monthly_table')
+
+    function extractDataTable(){
+        const table = Document.getElementById('this_month_table');
+        const dataRows = tableDocument.getElementByTagName("")
+
+        console.log(dataRows);
+
     }
-    
-    function applyYearFilter() {
-      const year = document.getElementById('yearFilter').value;
-      filterDataByYear(parseInt(year));
-    }
-</script>
-    
-<script>
+    extractDataTable()
+
     Chart.scaleService.updateScaleDefaults('linear', {
             ticks: {
                 min: 0
             }
     });
-   
-    let sum_expenses = JSON.parse({{ sum_expenses | tojson }});
-    let sum_incomes = JSON.parse({{ sum_incomes | tojson }});
+
+    let sum_expenses = JSON.parse ({{ sum_expenses | tojson }});
+    let sum_incomes = JSON.parse ({{ sum_incomes | tojson }});
 
     let income_vs_expense_chart = new Chart(income_vs_expense, {
             type: 'pie',
@@ -171,7 +150,7 @@
             {
                 labels: income_labels,
                 datasets: [{
-                    label: "Income Over Time",
+                    label: "Saving Over Time",
                     data: income_amount,
                     fill: false,
                     borderColor: "rgb(83, 163, 251)",
@@ -193,8 +172,7 @@
                 datasets: [{
                     label: '',
                     data: category_amount,
-                    backgroundColor: ['#FFF689', '#F4D35E', '#FFB88A', '#FF9C5B', '#F67B45', 
-                    '#FBC2C2', '#E39B99', '#CB7876', '#CD4662', '#F3E7D3'],
+                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3', ' #98F5E1'],
                     borderWidth: 1,
                     hoverBorderColor: "black",
                     hoverBorderWidth: 2,
@@ -232,9 +210,7 @@
                 datasets: [{
                     label: '',
                     data: categorys_amounts,
-                    backgroundColor: ['#B4CFA4', '#8BA47C', '#62866C', '#A0C5E3', '#81B2D9', 
-                    '#32769B',  '#BBA6DD', '#8C7DA8', '#64557B', '#1E2136 '],
-
+                    backgroundColor: ['#F1C0E8', '#CFBAF0', '#A3C4F3','#98F5E1',],
                     borderWidth: 1,
                     hoverBorderColor: "black",
                     hoverBorderWidth: 2,
@@ -262,8 +238,6 @@
                     }
                 })
 </script>
-
-
 
 {% endblock %}
 {% endblock %}
