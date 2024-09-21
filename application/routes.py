@@ -638,6 +638,7 @@ def tree():
             image = "tree_images/tree3.png"
    
         else:
+            progress = 100
             image = "tree_images/tree_goal.jpg" 
         
 
@@ -685,15 +686,25 @@ def compare():
         # Get the net amount if the month_year exists in net_dict, otherwise set net to 0
         net_amount = net_dict.get(month_year, 0)
 
+        if goal_entry.amount == 0 :
+            progress = 0
+
+        else:  # Avoid division by zero
+            progress = ( net_amount / goal_entry.amount) * 100
+            if progress > 100: progress = 100
+
         # Append the results
         amounts.append({
             'id':goal_entry.id,
             'month_year': month_year,
             'goal': goal_entry.amount,
-            'net': net_amount
+            'net': net_amount,
+            'progress' :progress
         })
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
+
+        
 
     # form = CompareForm()
     # month1_data, month2_data = None, None

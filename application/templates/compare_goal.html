@@ -31,7 +31,14 @@
                         <td>{{entry.month_year}}</td>
                         <td class="amount-field">RM {{ "{:.2f}".format(entry.goal) }}</td>
                         <td class="amount-field">RM {{ "{:.2f}".format(entry.net) }}</td>
-                        <td></td>
+                        {% if entry.progress < 0 %}
+                            <td><span style="color: rgb(223, 20, 20);">{{ entry.progress | round(2) }}%</span></td>
+                        {% elif entry.progress == 100 %}
+                            <td><span style="color: rgb(0, 100, 38);">{{ entry.progress | round(2) }}%</span></td>
+                        {% else %}
+                            <td>{{ entry.progress | round(2) }}%</td>
+                        {% endif %}
+
                         <td></td><td><a href="{{ url_for('edit_goal', entry_id=entry.id) }}"  class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
                         <td><a href="{{ url_for('delete_goal', entry_id=entry.id ) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
                     </tr>
