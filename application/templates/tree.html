@@ -5,46 +5,56 @@
     <title>Tree</title>
 </head>
 <body>
-    <div class="container">
-
-        <form action="" method="POST">
-            {{ form.csrf_token() }}
-            <fieldset class="form-group">
-                <div class="form-group">
-                    {{ form.amount.label(class="form-control-label") }}
-                    {% if form.amount.errors %}
-                        {{ form.amount(class="form-control form-control-sm is-invalid") }}
-                        {% for error in form.amount.errors %}
-                            <div class="invalid-feedback">
-                                <span>{{error}}</span>
+    
+    
+        <div class="col-xs-8 col-sm-4 col-md-4 col-lg-3 ml-auto mr-auto">
+            <div class="card card-style mb-2">
+                <div class="card-body">
+                    <form action="" method="POST">
+                        {{ form.csrf_token() }}
+                        <fieldset class="form-group">
+                            <legend class="mb-4">Set goal</legend>
+                            <div class="form-group">
+                                {{ form.amount.label(class="form-control-label") }}
+                                {% if form.amount.errors %}
+                                    {{ form.amount(class="form-control form-control-sm is-invalid") }}
+                                    {% for error in form.amount.errors %}
+                                        <div class="invalid-feedback">
+                                            <span>{{error}}</span>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    {{ form.amount(class="form-control form-control-sm") }}
+                                {% endif %}
                             </div>
-                        {% endfor %}
-                    {% else %}
-                        {{ form.amount(class="form-control form-control-sm") }}
-                    {% endif %}
-                </div>
 
-                <div class="form-group">
-                    {{ form.month.label(class = "form-control-label") }}
-                    {{ form.month(class = "form-control form-control-sm") }}
-                </div>
+                            <div class="form-group">
+                                {{ form.month.label(class = "form-control-label") }}
+                                {{ form.month(class = "form-control form-control-sm") }}
+                            </div>
 
-                <div class="form-group">
-                    {{ form.year.label(class = "form-control-label") }}
-                    {{ form.year(class = "form-control form-control-sm") }}
-                </div>
+                            <div class="form-group">
+                                {{ form.year.label(class = "form-control-label") }}
+                                {{ form.year(class = "form-control form-control-sm") }}
+                            </div>
 
-                <div class="form-group border-bottom pb-3">
-                    {{ form.submit(class="btn btn-outline-info btn-block")}}
+                            <div class="form-group border-bottom pb-3">
+                                {{ form.submit(class="btn btn-outline-info btn-block")}}
+                            </div>
+                        </fieldset>
+                    </form>
                 </div>
-            </fieldset>
-        </form>
-
-        {% if goal %}
-        <h3>Your goal:RM{{ goal.amount }}</h3>
-        <h4>Your current saving:RM{{ net_monthly_table }}</h4>
-        <img src="{{ url_for('static', filename=image) }}" class="img-fluid">
-        {% endif %}
+            </div>
+        </div>
+            
+        <div class="container">
+            {% if goal %}
+            <h3>Your goal:RM{{ goal.amount }}</h3>
+            <h4>Your current saving:RM{{ net_monthly_table }}</h4>
+            <img src="{{ url_for('static', filename=image) }}" class="img-fluid">
+            {% endif %}
+        </div>
+        
     </div>
 </body>
 
