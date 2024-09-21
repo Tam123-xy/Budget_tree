@@ -51,6 +51,13 @@
             {% if goal %}
             <h3>Your goal:RM{{ goal.amount }}</h3>
             <h4>Your current saving:RM{{ net_monthly_table }}</h4>
+            <h5>Progress: 
+                {% if progress is not none %}
+                    {{ progress|round(2) }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </h5>            
             <img src="{{ url_for('static', filename=image) }}" class="img-fluid">
             {% endif %}
         </div>
