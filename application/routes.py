@@ -619,19 +619,16 @@ def tree():
         progress = (current_saving / goal_amount) * 100
         if progress <= 25:
             image = "tree_images/tree1.png"
-            progres = progress
-        
+            
         elif progress <= 50:
             image = "tree_images/tree2.png"
-            progres = progress
-
+      
         elif progress <=75:
             image = "tree_images/tree3.png"
-            progres = progress
-
+   
         else:
             image = "tree_images/tree_goal.jpg" 
-            progres = progress
+        
 
     if form.validate_on_submit():
 
