@@ -187,7 +187,6 @@ def this_month_table_income():
     current_year = datetime.now().year
     current_month = datetime.now().month
     current_year_month = f'{current_year}-{current_month:02d}'
-    print(current_year_month)
 
     # Query add_incomes models with the condition of year-month, sort it by date in descending order
     incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
@@ -578,62 +577,77 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     # Redirect to the specified page
     return redirect(next_page)
 
+
 @app.route('/tree', methods=['POST', 'GET'])
 def tree():
-    form = GoalForm()
+    form= GoalForm()
+
+    # Get the current month and year, transfer into year-month format
+    year = datetime.now().year
+    month = datetime.now().month
+    current_year_month = f'{year}-{int(month):02d}'
+
+    # Query this goal model with condition of current month and year
+    current_goal = goal.query.filter_by(month=month, year=year).first()
+    print(current_goal)
+
+    if current_goal:
+        goal_amount = current_goal.amount 
+
+    else:
+        goal_amount = 0
+
+    print(f'goal_amount{goal_amount}')
+
+    # Query this month total saving
+    sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
+    result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
+
+    if result:
+        current_saving = result[0]
+
+    else:
+        current_saving = 0
+
+    print(f'current_saving{current_saving}')
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if goal_amount == 0 :
+        image = "tree_images/tree1.png" 
+
+    else:  # Avoid division by zero
+        progress = (current_saving / goal_amount) * 100
+        if progress <= 25:
+            image = "tree_images/tree1.png"
+        
+        elif progress <= 50:
+            image = "tree_images/tree2.png"
+
+        elif progress <=75:
+            image = "tree_images/tree3.png"
+
+        else:
+            image = "tree_images/tree_goal.jpg" 
 
     if form.validate_on_submit():
-        goal_amount = form.amount.data if form.amount.data else 0  # Set amount = 0 if user doesn't enter a value
+
+        # Check wheather has repeated month and year
+        month = int(form.month.data)
+        year = form.year.data
+        repeat_goal = db.session.query(goal).filter_by(month=month, year=year).first()
+
+        if repeat_goal:
+            # Delete the previous repeated data from goal model
+            db.session.delete(repeat_goal)
+            db.session.commit()
+
+        # Save data into goal model
         entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
         db.session.add(entry)
         db.session.commit()
         return redirect(url_for('tree'))
     
-    # Fetch the latest goal from the database
-    current_goal = db.session.query(goal).order_by(goal.id.desc()).first()
-    
-    # Decide which image to display based on current progress
-    goal_amount = 100  # Your goal amount, or fetch it from the database
-    image = "tree_images/tree1.png"  # Default image
-
-    if current_goal:
-        month = current_goal.month
-        year = current_goal.year
-
-        current_year_month = f'{year}-{int(month):02d}'
-
-        sum_income = db.session.query(
-            db.func.sum(add_incomes.amount)
-        ).filter(
-            func.strftime('%Y-%m', add_incomes.date) == current_year_month
-        ).scalar() or 0  # Ensure it returns 0 if no result
-
-        sum_expense = db.session.query(
-            db.func.sum(add_expenses.amount)
-        ).filter(
-            func.strftime('%Y-%m', add_expenses.date) == current_year_month
-        ).scalar() or 0  # Ensure it returns 0 if no result
-
-        current_saving = sum_income - sum_expense
-
-        # Set default image
-        image = "tree_images/tree1.png"
-        goal_amount = current_goal.amount
-
-        if goal_amount > 0:  # Avoid division by zero
-            progress = (current_saving / goal_amount) * 100
-            if progress >= 100:
-                image = "tree_images/tree_goal.jpg"  # Goal achieved
-            elif progress >= 67:
-                image = "tree_images/tree3.png"  # More than 66% progress
-            elif progress >= 34:
-                image = "tree_images/tree2.png"  # Between 34% and 66% progress
-            else:
-                image = "tree_images/tree1.png"  # Less than 34% progress
-
-    else:
-        current_saving = 0
-        image = "tree_images/tree1.png"  # Default image if no goal exists
+   
 
     return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving)
 
