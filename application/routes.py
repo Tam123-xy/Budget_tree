@@ -1,6 +1,6 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm, this_month_table_Form, CompareForm
 from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case
 import json
@@ -412,66 +412,6 @@ def search_expense():
         results = []
 
     return render_template('search_result.html', results=results)
-
-    
-@app.route('/tree', methods=['POST', 'GET'])
-def tree():
-    form = GoalForm()
-
-    if form.validate_on_submit():
-        goal_amount = form.amount.data if form.amount.data else 0 # set amount = 0 if user doesnt enter a value
-        entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
-        db.session.add(entry)
-        db.session.commit()
-        return redirect(url_for('tree'))
-    
-     # Fetch the latest goal from the database
-    current_goal = db.session.query(goal).order_by(goal.id.desc()).first()
-    
-    # Decide which image to display based on current progress
-    goal_amount = 100  # Your goal amount, or fetch it from the database
-    image = "../static/tree_images/tree1.png"  # Default image
-
-    if current_goal:
-        month = current_goal.month
-        year = current_goal.year
-
-        current_year_month = f'{year}-{int(month):02d}'
-
-        sum_income = db.session.query(
-            db.func.sum(add_incomes.amount)
-        ).filter(
-            func.strftime('%Y-%m', add_incomes.date) == current_year_month
-        ).scalar() or 0  # Ensure it returns 0 if no result
-
-        sum_expense = db.session.query(
-            db.func.sum(add_expenses.amount)
-        ).filter(
-            func.strftime('%Y-%m', add_expenses.date) == current_year_month
-        ).scalar() or 0  # Ensure it returns 0 if no result
-
-        current_saving = sum_income - sum_expense
-
-        # Set default image
-        image = "tree_images/tree1.png"
-        goal_amount = current_goal.amount
-
-        if goal_amount > 0:  # Avoid division by zero
-            progress = (current_saving / goal_amount) * 100
-            if progress >= 100:
-                image = "tree_images/tree_goal.png"  # Goal achieved
-            elif progress >= 67:
-                image = "tree_images/tree3.png"  # More than 66% progress
-            elif progress >= 34:
-                image = "tree_images/tree2.png"  # Between 34% and 66% progress
-            else:
-                image = "tree_images/tree1.png"  # Less than 34% progress
-
-    else:
-        current_saving = 0
-        image = "tree_images/tree1.png"  # Default image if no goal exists
-
-    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image)
     
 @app.route('/category', methods = ["POST", "GET"])
 def categoryy():
@@ -510,7 +450,7 @@ def edit_category(entry_category,entry_type):
     sql_query = text('SELECT * FROM category WHERE type = :entry_type AND category = :entry_category')
     result = db.session.execute(sql_query, {'entry_type': entry_type, 'entry_category': entry_category}).fetchone()
 
-    # Pre-fill form fields with the fetched result
+    # Pre-fill form fields with the festched result
     if request.method == 'GET':
         form.type.data = result[1]  
         form.category.data = result[2]  
@@ -638,16 +578,85 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     # Redirect to the specified page
     return redirect(next_page)
 
-        
+@app.route('/tree', methods=['POST', 'GET'])
+def tree():
+    form = GoalForm()
+
+    if form.validate_on_submit():
+        goal_amount = form.amount.data if form.amount.data else 0  # Set amount = 0 if user doesn't enter a value
+        entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
+        db.session.add(entry)
+        db.session.commit()
+        return redirect(url_for('tree'))
     
-
-
-
+    # Fetch the latest goal from the database
+    current_goal = db.session.query(goal).order_by(goal.id.desc()).first()
     
+    # Decide which image to display based on current progress
+    goal_amount = 100  # Your goal amount, or fetch it from the database
+    image = "tree_images/tree1.png"  # Default image
 
+    if current_goal:
+        month = current_goal.month
+        year = current_goal.year
 
-    
-    
+        current_year_month = f'{year}-{int(month):02d}'
 
+        sum_income = db.session.query(
+            db.func.sum(add_incomes.amount)
+        ).filter(
+            func.strftime('%Y-%m', add_incomes.date) == current_year_month
+        ).scalar() or 0  # Ensure it returns 0 if no result
+
+        sum_expense = db.session.query(
+            db.func.sum(add_expenses.amount)
+        ).filter(
+            func.strftime('%Y-%m', add_expenses.date) == current_year_month
+        ).scalar() or 0  # Ensure it returns 0 if no result
+
+        current_saving = sum_income - sum_expense
+
+        # Set default image
+        image = "tree_images/tree1.png"
+        goal_amount = current_goal.amount
+
+        if goal_amount > 0:  # Avoid division by zero
+            progress = (current_saving / goal_amount) * 100
+            if progress >= 100:
+                image = "tree_images/tree_goal.jpg"  # Goal achieved
+            elif progress >= 67:
+                image = "tree_images/tree3.png"  # More than 66% progress
+            elif progress >= 34:
+                image = "tree_images/tree2.png"  # Between 34% and 66% progress
+            else:
+                image = "tree_images/tree1.png"  # Less than 34% progress
+
+    else:
+        current_saving = 0
+        image = "tree_images/tree1.png"  # Default image if no goal exists
+
+    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving)
+
+@app.route('/compare', methods=['GET', 'POST'])
+def compare():
+    form = CompareForm()
+    month1_data, month2_data = None, None
+
+    if form.validate_on_submit():
+        # Get the form data (the two months and years to compare)
+        month1 = form.month1.data
+        year1 = form.year1.data
+        month2 = form.month2.data
+        year2 = form.year2.data
+
+        # Query the database for the first month and year
+        month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
+
+        # Query the database for the second month and year
+        month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
+
+        return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
+
+    return render_template('compare_goal.html', form=form)
 
 
