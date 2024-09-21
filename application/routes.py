@@ -622,6 +622,7 @@ def tree():
 
     if goal_amount == 0 :
         image = "tree_images/tree1.png" 
+        progress = 0
 
     else:  # Avoid division by zero
         progress = (current_saving / goal_amount) * 100
@@ -658,8 +659,6 @@ def tree():
         db.session.commit()
         return redirect(url_for('tree'))
     
-   
-
     return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving, progres=progress)
 
 @app.route('/compare', methods=['GET', 'POST'])
