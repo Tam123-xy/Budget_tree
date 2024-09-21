@@ -620,10 +620,9 @@ def tree():
 
     print(f'current_saving{current_saving}')
 
-# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if goal_amount == 0 :
-        progress = 0
         image = "tree_images/tree1.png" 
+        progress = 0
 
     else:  # Avoid division by zero
         progress = (current_saving / goal_amount) * 100
@@ -637,9 +636,10 @@ def tree():
 
         elif progress <=99:
             image = "tree_images/tree3.png"
-
+   
         else:
             image = "tree_images/tree_goal.jpg" 
+        
 
     if form.validate_on_submit():
 
@@ -659,30 +659,99 @@ def tree():
         db.session.commit()
         return redirect(url_for('tree'))
     
-   
-
-    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving, progress=progress)
+    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving, progres=progress)
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
-    form = CompareForm()
-    month1_data, month2_data = None, None
 
+    goall = goal.query.all()
+
+    # Query to sum the amount in the 'net' model, grouped by year-month
+    net_query = db.session.query(
+        func.sum(net.amount).label('total'),
+        func.strftime('%Y-%m', net.date).label('month_year')
+    ).group_by(func.strftime('%Y-%m', net.date)).all()
+
+    # Create a dictionary for net results with 'month_year' as key
+    net_dict = {result.month_year: result.total for result in net_query}
+
+    amounts = []
+
+    # Loop through each goal entry and compare with the net data
+    for goal_entry in goall:
+        # Create the formatted 'year-month' string for the goal entry
+        month_year = f'{goal_entry.year}-{int(goal_entry.month):02d}'
+
+        # Get the net amount if the month_year exists in net_dict, otherwise set net to 0
+        net_amount = net_dict.get(month_year, 0)
+
+        # Append the results
+        amounts.append({
+            'id':goal_entry.id,
+            'month_year': month_year,
+            'goal': goal_entry.amount,
+            'net': net_amount
+        })
+
+        amounts.sort(key=lambda x: x['month_year'], reverse=True)
+
+    # form = CompareForm()
+    # month1_data, month2_data = None, None
+
+    # if form.validate_on_submit():
+    #     # Get the form data (the two months and years to compare)
+    #     month1 = form.month1.data
+    #     year1 = form.year1.data
+    #     month2 = form.month2.data
+    #     year2 = form.year2.data
+
+    #     # Query the database for the first month and year
+    #     month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
+
+    #     # Query the database for the second month and year
+    #     month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
+
+    #     return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
+
+    # return render_template('compare_goal.html', form=form)
+    return render_template('compare_goal.html', amounts=amounts)
+
+@app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
+def delete_goal(entry_id):
+    
+    # Querying category models with the condition of category and type, and delete it
+    entry = goal.query.get_or_404(entry_id)
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash('Deletion was successful', 'success')
+    
+    return redirect(url_for('compare'))
+
+@app.route('/edit_goal/<int:entry_id>', methods=['POST', 'GET'])
+def edit_goal(entry_id):
+    form = GoalForm()
+
+    sql_query = text(f'SELECT * FROM goal WHERE id = :entry_id')
+    result = db.session.execute(sql_query, {'entry_id': entry_id}).fetchone()
+
+    if request.method == 'GET':
+        form.amount.data = result[1]  
+        form.month.data = result[2]
+        form.year.data = result[3]
+    
     if form.validate_on_submit():
-        # Get the form data (the two months and years to compare)
-        month1 = form.month1.data
-        year1 = form.year1.data
-        month2 = form.month2.data
-        year2 = form.year2.data
+        entry = goal.query.get_or_404(entry_id)
+        db.session.delete(entry)
 
-        # Query the database for the first month and year
-        month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
+        entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
+        db.session.add(entry)
 
-        # Query the database for the second month and year
-        month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
+        db.session.commit()
 
-        return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
+        return redirect(url_for('compare'))
 
-    return render_template('compare_goal.html', form=form)
+
+    return render_template('edit_goal.html', form=form)
 
 
