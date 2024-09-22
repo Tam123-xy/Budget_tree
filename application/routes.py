@@ -465,15 +465,9 @@ def edit_category(entry_category,entry_type):
 
     # If the user clicked save button
     if form.validate_on_submit():
-        
-        # Query based on previous of type (Expense or Income) and category, and delete it
+
         entry = category.query.filter_by(category= entry_category, type=entry_type).first()
-        db.session.delete(entry)
-
-        # Save the latest data into category model
-        entryy = category(category=form.category.data, type=form.type.data)
-        db.session.add(entryy)
-
+        entry.category=form.category.data
         db.session.commit()
     
         return redirect(url_for('categoryy'))
@@ -507,46 +501,23 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
     # If the user clicked save button
     if form.validate_on_submit():
 
-        # Identify the data is from add_expenses model or add_incomes model, and delete it from its model by its id, and save the lastest data into add_expenses model
+        
         if entry_type == 'Expense':
-            entry = add_expenses.query.get_or_404(entry_id)
-            db.session.delete(entry)
-           
-            entryy = add_expenses(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
-            db.session.add(entryy)
-
-            db.session.commit()
+            entry = add_expenses.query.get(entry_id)
+            entry.amount=form.amount.data
+            entry.category=form.category.data
+            entry.date= form.date.data
+            entry.nota=form.nota.data
+    
 
         else: 
-            # delete it from add_incomes model by its id, and save the lastest data into add_incomes model
-            entry = add_incomes.query.get_or_404(entry_id)
-            db.session.delete(entry)
-        
-            entryy = add_incomes(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
-            db.session.add(entryy)
-
-            db.session.commit()
-
-
-        # Identify the data of type is income or expense, delete it from net model with the codition of amount, date, type and save the latest data into net model, the amount must be in negative form
-        if entry_type == 'Expense':
-            ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type='Expense').first()
-            db.session.delete(ent)
-
-            nett = net(amount=-abs(form.amount.data), date=form.date.data, type='Expense')
-            db.session.add(nett)
-
-            db.session.commit()
-
-        else:
-            # delete it from net model with the codition of amount, date, type and save the latest data into net model, the amount must be in negative form which is its default form
-            ent = net.query.filter_by(amount= entry_amount, date=entry_date, type='Income').first()
-            db.session.delete(ent)
-
-            nett = net(amount=(form.amount.data), date=form.date.data, type='Income')
-            db.session.add(nett)
-
-            db.session.commit()
+            entry = add_incomes.query.get(entry_id)
+            entry.amount=form.amount.data
+            entry.category=form.category.data
+            entry.date= form.date.data
+            entry.nota=form.nota.data
+     
+        db.session.commit()
 
         next_page = request.args.get('next', '/')
     
@@ -650,14 +621,11 @@ def tree():
         repeat_goal = db.session.query(goal).filter_by(month=month, year=year).first()
 
         if repeat_goal:
-            # Delete the previous repeated data from goal model
-            db.session.delete(repeat_goal)
+            repeat_goal.amount=form.amount.data
+            repeat_goal.month=form.month.data
+            repeat_goal.year=form.year.data
             db.session.commit()
 
-        # Save data into goal model
-        entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
-        db.session.add(entry)
-        db.session.commit()
         return redirect(url_for('tree'))
     
     return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving, progres=progress)
@@ -703,8 +671,6 @@ def compare():
         })
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
-
-        
 
     # form = CompareForm()
     # month1_data, month2_data = None, None
@@ -752,12 +718,13 @@ def edit_goal(entry_id):
         form.year.data = result[3]
     
     if form.validate_on_submit():
-        entry = goal.query.get_or_404(entry_id)
-        db.session.delete(entry)
 
-        entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
-        db.session.add(entry)
+        goal_entry = goal.query.get(entry_id)
 
+        goal_entry.amount=form.amount.data
+        goal_entry.month=form.month.data
+        goal_entry.year=form.year.data
+       
         db.session.commit()
 
         return redirect(url_for('compare'))
