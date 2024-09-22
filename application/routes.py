@@ -6,6 +6,7 @@ from sqlalchemy import func, case, and_
 import json
 from datetime import datetime, date, timedelta
 from sqlalchemy.sql import text
+from decimal import Decimal
 
 def combine_table(expenses,incomes):
     # Combine the entries
@@ -475,7 +476,7 @@ def edit_category(entry_category,entry_type):
     return render_template('edit_category.html', form=form)
 
 
-@app.route('/get_record/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+@app.route('/get_record/<int:entry_id>/<string:entry_type>/<entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
 def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
@@ -501,21 +502,27 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
     # If the user clicked save button
     if form.validate_on_submit():
 
-        
         if entry_type == 'Expense':
             entry = add_expenses.query.get(entry_id)
             entry.amount=form.amount.data
             entry.category=form.category.data
             entry.date= form.date.data
             entry.nota=form.nota.data
-    
 
+            ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type='Expense').first()
+            ent.amount=-abs(form.amount.data)
+            ent.date=form.date.data
+           
         else: 
             entry = add_incomes.query.get(entry_id)
             entry.amount=form.amount.data
             entry.category=form.category.data
             entry.date= form.date.data
             entry.nota=form.nota.data
+
+            ent = net.query.filter_by(amount= entry_amount, date=entry_date, type='Income').first()
+            ent.amount=form.amount.data
+            ent.date=form.date.data
      
         db.session.commit()
 
@@ -526,10 +533,11 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     return render_template('edit.html', form=form)
 
-@app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+@app.route('/delete/<int:entry_id>/<string:entry_type>/<entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
 def delete(entry_id, entry_type, entry_amount, entry_date):
     # Parse the date string into a datetime object
     entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+    
 
     # Identify if it's an expense or income entry and retrieve the correct entry
     if entry_type == 'Expense':
@@ -540,6 +548,7 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
         
     if entry_type == 'Expense':
         ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type=entry_type).first()
+
 
     else:
         ent = net.query.filter_by(amount= entry_amount, date=entry_date, type=entry_type).first()
