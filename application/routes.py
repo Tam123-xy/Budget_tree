@@ -592,11 +592,12 @@ def tree():
     sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
     result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
 
-    if result:
-        current_saving = result[0]
-
-    else:
+    if result[0]== None:
         current_saving = 0
+        
+    else:
+        current_saving = result[0]
+        
 
     print(f'current_saving{current_saving}')
 
@@ -635,9 +636,16 @@ def tree():
             repeat_goal.year=form.year.data
             db.session.commit()
 
+        else:
+          # Save data into goal model
+            entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
+            db.session.add(entry)
+            db.session.commit()
+
+
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving, progres=progress)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress)
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
