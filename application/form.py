@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, DateField, StringField, DecimalField, IntegerField, RadioField
 from wtforms.validators import DataRequired, NumberRange, Optional
-from datetime import date
+from datetime import date, datetime
 
 class IncomeForm(FlaskForm):
     amount = DecimalField('Amount (RM)', validators = [DataRequired(), NumberRange(min=0.01)]) 
@@ -38,7 +38,7 @@ class this_month_table_Form(FlaskForm):
 
 class GoalForm(FlaskForm):
     amount = DecimalField('Enter your goal', validators=[DataRequired(),  NumberRange(min=0.01)])
-    month = SelectField ('Month' , validators=[DataRequired()],
+    month = SelectField ('Month', validators=[DataRequired()],
                                             choices  =[('1', 'January'),
                                                       ('2','February'),
                                                       ('3','March'),
@@ -54,7 +54,6 @@ class GoalForm(FlaskForm):
                                                       ])
     year = IntegerField('Year', validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField('Save Goal')
-
 
 class create_categoryForm(FlaskForm):
     category = StringField('Category',validators = [DataRequired()]) 

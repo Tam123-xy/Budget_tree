@@ -1,7 +1,49 @@
 {% extends 'layout.html' %}
 {% block content %}
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compare Monthly Goals</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+
+<div class="col-sm-10 ml-auto mr-auto ">
+    <center>
+     <H1>Transaction History</H1>
+    </center>
+    <br>
+
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">No</th>
+                <th scope="col">Date</th>
+                <th scope="col">Goal</th>
+                <th scope="col">Net Saving</th>
+                <th scope="col">Progres</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        
+        <tbody id="results">
+            {% for entry in amounts %}
+                    <tr>
+                        <th scope="row">{{loop.index}}</th>
+                        <td>{{entry.month_year}}</td>
+                        <td class="amount-field">RM {{ "{:.2f}".format(entry.goal) }}</td>
+                        <td class="amount-field">RM {{ "{:.2f}".format(entry.net) }}</td>
+                        {% if entry.progress < 0 %}
+                            <td><span style="color: rgb(223, 20, 20);">{{ entry.progress | round(2) }}%</span></td>
+                        {% elif entry.progress == 100 %}
+                            <td><span style="color: rgb(0, 100, 38);">{{ entry.progress | round(2) }}%</span></td>
+                        {% else %}
+                            <td>{{ entry.progress | round(2) }}%</td>
+                        {% endif %}
+
+                        <td></td><td><a href="{{ url_for('edit_goal', entry_id=entry.id) }}"  class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
+                        <td><a href="{{ url_for('delete_goal', entry_id=entry.id ) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
+                    </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

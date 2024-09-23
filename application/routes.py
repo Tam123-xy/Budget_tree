@@ -6,6 +6,7 @@ from sqlalchemy import func, case, and_
 import json
 from datetime import datetime, date, timedelta
 from sqlalchemy.sql import text
+from decimal import Decimal
 
 def combine_table(expenses,incomes):
     # Combine the entries
@@ -465,15 +466,9 @@ def edit_category(entry_category,entry_type):
 
     # If the user clicked save button
     if form.validate_on_submit():
-        
-        # Query based on previous of type (Expense or Income) and category, and delete it
+
         entry = category.query.filter_by(category= entry_category, type=entry_type).first()
-        db.session.delete(entry)
-
-        # Save the latest data into category model
-        entryy = category(category=form.category.data, type=form.type.data)
-        db.session.add(entryy)
-
+        entry.category=form.category.data
         db.session.commit()
     
         return redirect(url_for('categoryy'))
@@ -481,7 +476,7 @@ def edit_category(entry_category,entry_type):
     return render_template('edit_category.html', form=form)
 
 
-@app.route('/get_record/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+@app.route('/get_record/<int:entry_id>/<string:entry_type>/<entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
 def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
@@ -507,46 +502,29 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
     # If the user clicked save button
     if form.validate_on_submit():
 
-        # Identify the data is from add_expenses model or add_incomes model, and delete it from its model by its id, and save the lastest data into add_expenses model
         if entry_type == 'Expense':
-            entry = add_expenses.query.get_or_404(entry_id)
-            db.session.delete(entry)
-           
-            entryy = add_expenses(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
-            db.session.add(entryy)
+            entry = add_expenses.query.get(entry_id)
+            entry.amount=form.amount.data
+            entry.category=form.category.data
+            entry.date= form.date.data
+            entry.nota=form.nota.data
 
-            db.session.commit()
-
-        else: 
-            # delete it from add_incomes model by its id, and save the lastest data into add_incomes model
-            entry = add_incomes.query.get_or_404(entry_id)
-            db.session.delete(entry)
-        
-            entryy = add_incomes(amount=form.amount.data, category=form.category.data, date= form.date.data, nota=form.nota.data)
-            db.session.add(entryy)
-
-            db.session.commit()
-
-
-        # Identify the data of type is income or expense, delete it from net model with the codition of amount, date, type and save the latest data into net model, the amount must be in negative form
-        if entry_type == 'Expense':
             ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type='Expense').first()
-            db.session.delete(ent)
+            ent.amount=-abs(form.amount.data)
+            ent.date=form.date.data
+           
+        else: 
+            entry = add_incomes.query.get(entry_id)
+            entry.amount=form.amount.data
+            entry.category=form.category.data
+            entry.date= form.date.data
+            entry.nota=form.nota.data
 
-            nett = net(amount=-abs(form.amount.data), date=form.date.data, type='Expense')
-            db.session.add(nett)
-
-            db.session.commit()
-
-        else:
-            # delete it from net model with the codition of amount, date, type and save the latest data into net model, the amount must be in negative form which is its default form
             ent = net.query.filter_by(amount= entry_amount, date=entry_date, type='Income').first()
-            db.session.delete(ent)
-
-            nett = net(amount=(form.amount.data), date=form.date.data, type='Income')
-            db.session.add(nett)
-
-            db.session.commit()
+            ent.amount=form.amount.data
+            ent.date=form.date.data
+     
+        db.session.commit()
 
         next_page = request.args.get('next', '/')
     
@@ -555,10 +533,11 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     return render_template('edit.html', form=form)
 
-@app.route('/delete/<int:entry_id>/<string:entry_type>/<int:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+@app.route('/delete/<int:entry_id>/<string:entry_type>/<entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
 def delete(entry_id, entry_type, entry_amount, entry_date):
     # Parse the date string into a datetime object
     entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+    
 
     # Identify if it's an expense or income entry and retrieve the correct entry
     if entry_type == 'Expense':
@@ -569,6 +548,7 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
         
     if entry_type == 'Expense':
         ent = net.query.filter_by(amount= -abs(entry_amount), date=entry_date, type=entry_type).first()
+
 
     else:
         ent = net.query.filter_by(amount= entry_amount, date=entry_date, type=entry_type).first()
@@ -612,18 +592,18 @@ def tree():
     sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
     result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
 
-    if result:
-        current_saving = result[0]
-
-    else:
+    if result[0]== None:
         current_saving = 0
+        
+    else:
+        current_saving = result[0]
+        
 
     print(f'current_saving{current_saving}')
 
-# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if goal_amount == 0 :
-        progress = 0
         image = "tree_images/tree1.png" 
+        progress = 0
 
     else:  # Avoid division by zero
         progress = (current_saving / goal_amount) * 100
@@ -637,9 +617,11 @@ def tree():
 
         elif progress <=99:
             image = "tree_images/tree3.png"
-
+   
         else:
+            progress = 100
             image = "tree_images/tree_goal.jpg" 
+        
 
     if form.validate_on_submit():
 
@@ -649,40 +631,122 @@ def tree():
         repeat_goal = db.session.query(goal).filter_by(month=month, year=year).first()
 
         if repeat_goal:
-            # Delete the previous repeated data from goal model
-            db.session.delete(repeat_goal)
+            repeat_goal.amount=form.amount.data
+            repeat_goal.month=form.month.data
+            repeat_goal.year=form.year.data
             db.session.commit()
 
-        # Save data into goal model
-        entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
-        db.session.add(entry)
-        db.session.commit()
+        else:
+          # Save data into goal model
+            entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data)
+            db.session.add(entry)
+            db.session.commit()
+
+
         return redirect(url_for('tree'))
     
-   
-
-    return render_template('tree.html', title="tree", form=form, goal=current_goal, image=image, net_monthly_table=current_saving, progress=progress)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress)
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
-    form = CompareForm()
-    month1_data, month2_data = None, None
 
+    goall = goal.query.all()
+
+    # Query to sum the amount in the 'net' model, grouped by year-month
+    net_query = db.session.query(
+        func.sum(net.amount).label('total'),
+        func.strftime('%Y-%m', net.date).label('month_year')
+    ).group_by(func.strftime('%Y-%m', net.date)).all()
+
+    # Create a dictionary for net results with 'month_year' as key
+    net_dict = {result.month_year: result.total for result in net_query}
+
+    amounts = []
+
+    # Loop through each goal entry and compare with the net data
+    for goal_entry in goall:
+        # Create the formatted 'year-month' string for the goal entry
+        month_year = f'{goal_entry.year}-{int(goal_entry.month):02d}'
+
+        # Get the net amount if the month_year exists in net_dict, otherwise set net to 0
+        net_amount = net_dict.get(month_year, 0)
+
+        if goal_entry.amount == 0 :
+            progress = 0
+
+        else:  # Avoid division by zero
+            progress = ( net_amount / goal_entry.amount) * 100
+            if progress > 100: progress = 100
+
+        # Append the results
+        amounts.append({
+            'id':goal_entry.id,
+            'month_year': month_year,
+            'goal': goal_entry.amount,
+            'net': net_amount,
+            'progress' :progress
+        })
+
+        amounts.sort(key=lambda x: x['month_year'], reverse=True)
+
+    # form = CompareForm()
+    # month1_data, month2_data = None, None
+
+    # if form.validate_on_submit():
+    #     # Get the form data (the two months and years to compare)
+    #     month1 = form.month1.data
+    #     year1 = form.year1.data
+    #     month2 = form.month2.data
+    #     year2 = form.year2.data
+
+    #     # Query the database for the first month and year
+    #     month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
+
+    #     # Query the database for the second month and year
+    #     month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
+
+    #     return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
+
+    # return render_template('compare_goal.html', form=form)
+    return render_template('compare_goal.html', amounts=amounts)
+
+@app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
+def delete_goal(entry_id):
+    
+    # Querying category models with the condition of category and type, and delete it
+    entry = goal.query.get_or_404(entry_id)
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash('Deletion was successful', 'success')
+    
+    return redirect(url_for('compare'))
+
+@app.route('/edit_goal/<int:entry_id>', methods=['POST', 'GET'])
+def edit_goal(entry_id):
+    form = GoalForm()
+
+    sql_query = text(f'SELECT * FROM goal WHERE id = :entry_id')
+    result = db.session.execute(sql_query, {'entry_id': entry_id}).fetchone()
+
+    if request.method == 'GET':
+        form.amount.data = result[1]  
+        form.month.data = result[2]
+        form.year.data = result[3]
+    
     if form.validate_on_submit():
-        # Get the form data (the two months and years to compare)
-        month1 = form.month1.data
-        year1 = form.year1.data
-        month2 = form.month2.data
-        year2 = form.year2.data
 
-        # Query the database for the first month and year
-        month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
+        goal_entry = goal.query.get(entry_id)
 
-        # Query the database for the second month and year
-        month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
+        goal_entry.amount=form.amount.data
+        goal_entry.month=form.month.data
+        goal_entry.year=form.year.data
+       
+        db.session.commit()
 
-        return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
+        return redirect(url_for('compare'))
 
-    return render_template('compare_goal.html', form=form)
+
+    return render_template('edit_goal.html', form=form)
 
 
