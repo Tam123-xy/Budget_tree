@@ -1,0 +1,4 @@
+<div class="progress-section">
+    <p>Progress: {{ progress|round(2) }}%</p>
+    <img src="{{ url_for('static', filename=image) }}" alt="Tree Progress" class="image-small"/>
+</div>

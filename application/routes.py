@@ -783,4 +783,4 @@ def tree_goal(entry_id):
             image = "tree_images/tree_goal.jpg"
             progress = 100
 
-    return render_template('goal_image.html', goal=goal_amount, image=image, net_monthly_table=current_saving, progres=progress)
+    return render_template('goal_progress.html', image=image, progress=progress)
