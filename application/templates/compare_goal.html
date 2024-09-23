@@ -44,7 +44,7 @@
                         <td></td><td><a href="{{ url_for('edit_goal', entry_id=entry.id) }}"  class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
                         <td><a href="{{ url_for('delete_goal', entry_id=entry.id ) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
                         <td>
-                            <a hx-get="{{ url_for('tree_goal', entry_id=entry.id) }}" hx-target="#goal-image-section" hx-swap="innerHTML">
+                            <a hx-get="{{ url_for('tree_goal', entry_id=entry.id, entry_net= entry.net) }}" hx-target="#goal-image-section" hx-swap="innerHTML">
                                 <i class="fa-solid fa-tree" style="color: rgb(0, 100, 38);"></i>
                             </a>                            
                         </td>

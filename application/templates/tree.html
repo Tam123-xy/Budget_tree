@@ -42,7 +42,7 @@
             
         <div class="container">
             <h3>Your goal for this month :RM{{ goal }}</h3>
-            <h3>Your current saving for this month :RM{{ net_monthly_table }}</h3>
+            <h3>Your current saving for this month :RM{{ net_monthly_table| round(2) }}</h3>
             {% if progres %}
                 <h3>Progress :{{ progres|round(2) }} %</h3>
             {% endif %}

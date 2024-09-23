@@ -689,25 +689,6 @@ def compare():
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
 
-    # form = CompareForm()
-    # month1_data, month2_data = None, None
-
-    # if form.validate_on_submit():
-    #     # Get the form data (the two months and years to compare)
-    #     month1 = form.month1.data
-    #     year1 = form.year1.data
-    #     month2 = form.month2.data
-    #     year2 = form.year2.data
-
-    #     # Query the database for the first month and year
-    #     month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
-
-    #     # Query the database for the second month and year
-    #     month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
-
-    #     return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
-
-    # return render_template('compare_goal.html', form=form)
     return render_template('compare_goal.html', amounts=amounts)
 
 @app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
@@ -749,30 +730,23 @@ def edit_goal(entry_id):
 
     return render_template('edit_goal.html', form=form)
 
-@app.route('/tree_goal/<int:entry_id>', methods=['GET'])
-def tree_goal(entry_id):
+@app.route('/tree_goal/<int:entry_id>/<float:entry_net>', methods=['GET'])
+def tree_goal(entry_id,entry_net):
 
     goal_entry = goal.query.get(entry_id)
-    if not goal_entry:
-        flash("Goal not found", "error")
-        return redirect(url_for('compare'))
     
     goal_amount = goal_entry.amount
     year = goal_entry.year
     month = goal_entry.month
     current_year_month = f'{year}-{int(month):02d}'
+    net = entry_net
 
-    # Query this month's total savings
-    sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
-    result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
-
-    current_saving = result[0] if result[0] else 0
 
     if goal_amount == 0:
         image = "tree_images/tree1.png"
         progress = 0
     else:
-        progress = (current_saving / goal_amount) * 100
+        progress = (net / goal_amount) * 100
         if progress <= 25:
             image = "tree_images/tree1.png"
         elif progress <= 60:
@@ -783,4 +757,4 @@ def tree_goal(entry_id):
             image = "tree_images/tree_goal.jpg"
             progress = 100
 
-    return render_template('goal_progress.html', image=image, progress=progress)
+    return render_template('goal_progress.html', image=image, progress=progress, goal_amount=goal_amount, current_year_month=current_year_month, net=net)
