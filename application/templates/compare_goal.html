@@ -2,11 +2,12 @@
 {% block content %}
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.5.0"></script>
 </head>
 
 <div class="col-sm-10 ml-auto mr-auto ">
     <center>
-     <H1>Transaction History</H1>
+     <H1>Goal Progress</H1>
     </center>
     <br>
 
@@ -17,7 +18,8 @@
                 <th scope="col">Date</th>
                 <th scope="col">Goal</th>
                 <th scope="col">Net Saving</th>
-                <th scope="col">Progres</th>
+                <th scope="col">Progress</th>
+                <th scope="col"></th>
                 <th scope="col"></th>
                 <th scope="col"></th>
                 <th scope="col"></th>
@@ -41,9 +43,15 @@
 
                         <td></td><td><a href="{{ url_for('edit_goal', entry_id=entry.id) }}"  class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
                         <td><a href="{{ url_for('delete_goal', entry_id=entry.id ) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
+                        <td>
+                            <a hx-get="{{ url_for('tree_goal', entry_id=entry.id) }}" hx-target="#goal-image-section" hx-swap="innerHTML">
+                                <i class="fa-solid fa-tree" style="color: rgb(0, 100, 38);"></i>
+                            </a>                            
+                        </td>
                     </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
 {% endblock %}

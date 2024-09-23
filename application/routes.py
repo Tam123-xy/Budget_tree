@@ -749,4 +749,38 @@ def edit_goal(entry_id):
 
     return render_template('edit_goal.html', form=form)
 
+@app.route('/tree_goal/<int:entry_id>', methods=['GET'])
+def tree_goal(entry_id):
 
+    goal_entry = goal.query.get(entry_id)
+    if not goal_entry:
+        flash("Goal not found", "error")
+        return redirect(url_for('compare'))
+    
+    goal_amount = goal_entry.amount
+    year = goal_entry.year
+    month = goal_entry.month
+    current_year_month = f'{year}-{int(month):02d}'
+
+    # Query this month's total savings
+    sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
+    result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
+
+    current_saving = result[0] if result[0] else 0
+
+    if goal_amount == 0:
+        image = "tree_images/tree1.png"
+        progress = 0
+    else:
+        progress = (current_saving / goal_amount) * 100
+        if progress <= 25:
+            image = "tree_images/tree1.png"
+        elif progress <= 60:
+            image = "tree_images/tree2.png"
+        elif progress <= 99:
+            image = "tree_images/tree3.png"
+        else:
+            image = "tree_images/tree_goal.jpg"
+            progress = 100
+
+    return render_template('goal_image.html', goal=goal_amount, image=image, net_monthly_table=current_saving, progres=progress)
