@@ -576,6 +576,8 @@ def tree():
     month = datetime.now().month
     current_year_month = f'{year}-{int(month):02d}'
 
+    current_date = datetime.now().strftime("%Y-%m-%d")
+
     # Query this goal model with condition of current month and year
     current_goal = goal.query.filter_by(month=month, year=year).first()
     print(current_goal)
@@ -645,7 +647,7 @@ def tree():
 
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_date)
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
