@@ -339,27 +339,27 @@ def add_income():
 
 @app.route('/dashboard')
 def dashboard():
-    # Function to convert month number to name
+
     def get_month_name(month):
         month_names = ["", "January", "February", "March", "April", "May", "June", 
-                       "July", "August", "September", "October", "November", "December"]
+                    "July", "August", "September", "October", "November", "December"]
         return month_names[int(month)] if month and month.isdigit() else ""
 
     year = request.args.get('year')
     month = request.args.get('month')
     
-    # Initialize the current_month_year variable
+
     if year and month:
         month_name = get_month_name(month)
-        current_month_year = f"{month_name} {year}"  # Example: "September 2023"
+        current_month_year = f"{month_name} {year}"
     elif year:
-        current_month_year = f"{year}"  # Only year provided
+        current_month_year = f"{year}" 
     elif month:
-        current_month_year = f"{get_month_name(month)}"  # Only month provided
+        current_month_year = f"{get_month_name(month)}" 
     else:
-        current_month_year = "All time"  # No filters applied
+        current_month_year = "Overall data"
 
-    # Set up initial conditions for expenses and income
+
     condition_expense = (1 == 1)
     condition_income = (1 == 1)
 
@@ -371,23 +371,15 @@ def dashboard():
         condition_expense = and_(condition_expense, db.extract('month', add_expenses.date) == month)
         condition_income = and_(condition_income, db.extract('month', add_incomes.date) == month)
 
-    # Query expenses
+    
     expenses = db.session.query(db.func.sum(add_expenses.amount)).filter(condition_expense).all()
     expense = [total_expense[0] for total_expense in expenses]
 
-    # Query incomes
+    
     incomes = db.session.query(db.func.sum(add_incomes.amount)).filter(condition_income).all()
     income = [total_income[0] for total_income in incomes]
     
-    # Line chart data for expenses
-    dates = db.session.query(db.func.sum(add_expenses.amount), add_expenses.date).filter(condition_expense).group_by(add_expenses.date).order_by(add_expenses.date).all()
-    over_time_expenditure = []
-    dates_labels = []
-    for amount, date in dates:
-        over_time_expenditure.append(amount)
-        dates_labels.append(date.strftime('%d-%m-%Y'))
-
-    # Line chart data for incomes
+    # Line chart (incomes)
     dates_incomes = db.session.query(db.func.sum(add_incomes.amount), add_incomes.date).filter(condition_income).group_by(add_incomes.date).order_by(add_incomes.date).all()
     over_time_expenditure_income = []
     dates_income_labels = []
@@ -395,7 +387,15 @@ def dashboard():
         over_time_expenditure_income.append(amount)
         dates_income_labels.append(date.strftime('%d-%m-%Y'))
 
-    # Bar chart data for incomes
+    # Line chart (expenses)
+    dates = db.session.query(db.func.sum(add_expenses.amount), add_expenses.date).filter(condition_expense).group_by(add_expenses.date).order_by(add_expenses.date).all()
+    over_time_expenditure = []
+    dates_labels = []
+    for amount, date in dates:
+        over_time_expenditure.append(amount)
+        dates_labels.append(date.strftime('%d-%m-%Y'))
+
+    # Bar chart (incomes)
     income_category_amount = db.session.query(add_incomes.category, db.func.sum(add_incomes.amount)).filter(condition_income).group_by(add_incomes.category).all()
     income_category_amounts = []
     income_categorys = []
@@ -403,7 +403,7 @@ def dashboard():
         income_category_amounts.append(amount)
         income_categorys.append(category)
 
-    # Bar chart data for expenses
+    # Bar chart (expenses)
     expense_category_amount = db.session.query(add_expenses.category, db.func.sum(add_expenses.amount)).filter(condition_expense).group_by(add_expenses.category).all()
     expense_category_amounts = []
     expense_categorys = []
@@ -411,7 +411,8 @@ def dashboard():
         expense_category_amounts.append(amount)
         expense_categorys.append(category)
 
-    return render_template('dashboard.html', title="Dashboard",
+    return render_template('dashboard.html', 
+                           title="Dashboard",
                            current_month_year=current_month_year,
                            sum_expenses=json.dumps(expense),
                            sum_incomes=json.dumps(income),
