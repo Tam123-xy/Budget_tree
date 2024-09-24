@@ -38,7 +38,39 @@ def combine_table(expenses,incomes):
     entries.sort(key=lambda x: x['date'], reverse=True)
     return entries
 
-            
+def goal_net(net_query,goall):
+     # Create a dictionary for net results with 'month_year' as key
+    net_dict = {result.month_year: result.total for result in net_query}
+
+    amounts = []
+
+    # Loop through each goal entry and compare with the net data
+    for goal_entry in goall:
+        # Create the formatted 'year-month' string for the goal entry
+        month_year = f'{goal_entry.year}-{int(goal_entry.month):02d}'
+
+        # Get the net amount if the month_year exists in net_dict, otherwise set net to 0
+        net_amount = net_dict.get(month_year, 0)
+
+        if goal_entry.amount == 0 :
+            progress = 0
+
+        else:  # Avoid division by zero
+            progress = ( net_amount / goal_entry.amount) * 100
+            progress = min(progress, 100)  # Cap progress at 100%
+
+        # Append the results
+        amounts.append({
+            'id':goal_entry.id,
+            'month_year': month_year,
+            'goal': goal_entry.amount,
+            'net': net_amount,
+            'progress' :progress
+        })
+
+    amounts.sort(key=lambda x: x['month_year'], reverse=True)
+    return amounts
+
 
 @app.route('/', methods = ["POST", "GET"])
 def index():
@@ -62,6 +94,18 @@ def index():
     net = [round(sum_income[0] - sum_expense[0], 2)]
 
     return render_template('index.html', title="Transaction history", entries=entries,  sum_expense=sum_expense, sum_income=sum_income, net=net)
+
+@app.route('/set', methods=['POST','GET'])
+def set():
+    month = request.form.get('month')
+    year = request.form.get('year')
+   
+    current_year_month = f'{year}-{int(month):02d}'
+   
+    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
+    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+    entries = combine_table(expenses,incomes)
+    return render_template('default_table.html',entries=entries)
 
 
 @app.route('/set_income', methods=['POST','GET'])
@@ -295,6 +339,7 @@ def add_income():
 
 @app.route('/dashboard')
 def dashboard():
+    
     year=request.args.get('year')
     month=request.args.get('month')
     condition_expense = (1 == 1)
@@ -359,6 +404,7 @@ def dashboard():
                            expense_category_amount = json.dumps(expense_category_amounts),
                            expense_category = json.dumps(expense_categorys)
                            )
+
 @app.route('/monthly_charts')
 def monthly_charts():
     # Get the current month and year
@@ -476,7 +522,7 @@ def edit_category(entry_category,entry_type):
     return render_template('edit_category.html', form=form)
 
 
-@app.route('/get_record/<int:entry_id>/<string:entry_type>/<entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+@app.route('/get_record/<int:entry_id>/<string:entry_type>/<float:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
 def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
@@ -533,7 +579,7 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     return render_template('edit.html', form=form)
 
-@app.route('/delete/<int:entry_id>/<string:entry_type>/<entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
+@app.route('/delete/<int:entry_id>/<string:entry_type>/<float:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
 def delete(entry_id, entry_type, entry_amount, entry_date):
     # Parse the date string into a datetime object
     entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
@@ -676,7 +722,7 @@ def compare():
 
         else:  # Avoid division by zero
             progress = ( net_amount / goal_entry.amount) * 100
-            if progress > 100: progress = 100
+            progress = min(progress, 100)  # Cap progress at 100%
 
         # Append the results
         amounts.append({
@@ -689,25 +735,6 @@ def compare():
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
 
-    # form = CompareForm()
-    # month1_data, month2_data = None, None
-
-    # if form.validate_on_submit():
-    #     # Get the form data (the two months and years to compare)
-    #     month1 = form.month1.data
-    #     year1 = form.year1.data
-    #     month2 = form.month2.data
-    #     year2 = form.year2.data
-
-    #     # Query the database for the first month and year
-    #     month1_data = db.session.query(goal).filter_by(month=month1, year=year1).first()
-
-    #     # Query the database for the second month and year
-    #     month2_data = db.session.query(goal).filter_by(month=month2, year=year2).first()
-
-    #     return render_template('compare_goal.html', form=form, month1_data=month1_data, month2_data=month2_data)
-
-    # return render_template('compare_goal.html', form=form)
     return render_template('compare_goal.html', amounts=amounts)
 
 @app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
@@ -749,4 +776,107 @@ def edit_goal(entry_id):
 
     return render_template('edit_goal.html', form=form)
 
+@app.route('/tree_goal/<int:entry_id>', methods=['GET'])
+def tree_goal(entry_id):
 
+    goal_entry = goal.query.get(entry_id)
+    goal_amount = goal_entry.amount
+    year = goal_entry.year
+    month = goal_entry.month
+    current_year_month = f'{year}-{int(month):02d}'
+
+    sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month """)
+    result = db.session.execute(sql_query, {'current_year_month': current_year_month}).fetchone()
+
+    if result[0]== None:
+        current_saving = 0
+        
+    else:
+        current_saving = result[0]
+
+    print(f"goal_amount{goal_amount},current_year_month{current_year_month},net{current_saving}")
+
+
+    if goal_amount == 0:
+        image = "tree_images/tree1.png"
+        progress = 0
+    else:
+        progress = (current_saving / goal_amount) * 100
+        if progress <= 25:
+            image = "tree_images/tree1.png"
+        elif progress <= 60:
+            image = "tree_images/tree2.png"
+        elif progress <= 99:
+            image = "tree_images/tree3.png"
+        else:
+            image = "tree_images/tree_goal.jpg"
+            progress = 100
+
+    return render_template('goal_progress.html', image=image, progress=progress, goal_amount=goal_amount, current_year_month=current_year_month, net=current_saving)
+
+@app.route('/this_year_goaltable')
+def this_year_goaltable():
+    # Get the current year
+    current_year = str(datetime.now().year)  # Ensure it's a string for comparison
+
+    # Query goals for the current year
+    goall = goal.query.filter(goal.year == current_year).all()
+
+    # Query to sum the amount in the 'net' model, grouped by year-month
+    net_query = db.session.query(
+        func.sum(net.amount).label('total'),
+        func.strftime('%Y-%m', net.date).label('month_year')  # Adjust for your database
+    ).filter(func.strftime('%Y', net.date) == current_year).group_by(func.strftime('%Y-%m', net.date)).all()
+
+    amounts = goal_net(net_query,goall)
+
+    # Combine the results and render template
+    return render_template('this_year_goaltable.html', amounts=amounts)
+
+@app.route('/all_goaltable')
+def all_goaltable():
+    # Get the current year
+    goall = goal.query.all()
+
+    # Query to sum the amount in the 'net' model, grouped by year-month
+    net_query = db.session.query(
+        func.sum(net.amount).label('total'),
+        func.strftime('%Y-%m', net.date).label('month_year')
+    ).group_by(func.strftime('%Y-%m', net.date)).all()
+
+    amounts = goal_net(net_query,goall)
+
+    return render_template('this_year_goaltable.html', amounts=amounts)
+
+@app.route('/search_year_month',methods=['POST','GET'])
+def search_year_month():
+
+    month = request.form.get('month')
+    year = request.form.get('year')
+
+    if month == 'all':
+
+        goall = goal.query.filter(goal.year == year).all()
+
+        # Query to sum the amount in the 'net' model, grouped by year-month
+        net_query = db.session.query(
+            func.sum(net.amount).label('total'),
+            func.strftime('%Y-%m', net.date).label('month_year')
+        ).filter(func.strftime('%Y', net.date) == year).group_by(func.strftime('%Y-%m', net.date)).all()
+
+    else:
+
+        current_year_month = f'{year}-{int(month):02d}'
+
+        goall = goal.query.filter( goal.month == month, goal.year == year).all()
+
+        # Query to sum the amount in the 'net' model, grouped by year-month
+        net_query = db.session.query(
+            func.sum(net.amount).label('total'),
+            func.strftime('%Y-%m', net.date).label('month_year')
+        ).filter(func.strftime('%Y-%m', net.date) == current_year_month).group_by(func.strftime('%Y-%m', net.date)).all()
+
+    amounts = goal_net(net_query,goall)
+
+   
+    return render_template('this_year_goaltable.html',amounts=amounts)

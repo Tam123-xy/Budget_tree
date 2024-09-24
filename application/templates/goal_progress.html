@@ -1,0 +1,6 @@
+<div class="progress-section">
+    <h3>Your goal for {{current_year_month}} :RM{{ goal_amount|round(2) }}</h3>
+    <h3>Your current saving for {{current_year_month}} :RM{{ net|round(2) }}</h3>
+    <h3>Progress: {{ progress|round(2) }}%</h3>
+    <img src="{{ url_for('static', filename=image) }}" alt="Tree Progress" class="image-small"/>
+</div>
