@@ -27,9 +27,14 @@
     </div>
     
     <button type="submit" class="btn btn-primary mr-2 mb-2">Filter</button>
-    <button type="submit" class="btn btn-dark mb-2" onclick="setThisMonth()">This Month</button>
- 
+    <button type="submit" class="btn btn-dark mb-2 mr-2" onclick="setThisMonth()">This Month</button>
+
+    <h3><span id="currentFilter">Showing data for: {{ current_month_year }}</span></h3>
+    
+    </script>
+
     </form>
+
 </div>
 
 
@@ -97,7 +102,7 @@
 
     }
 </script>
-    
+
 <script>
 
     Chart.scaleService.updateScaleDefaults('linear', {
