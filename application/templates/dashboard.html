@@ -1,0 +1,275 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<div class="col-xs-12 col-sm-12 col-md-12">
+    <form class="form-inline" action="{{ url_for('dashboard') }}" method="GET">
+        <div class="form-group mb-2">
+        <input type="number" min="2000" max="2050" style="width: 150px;"
+             class="form-control" name="year" id="year" placeholder="Select Year">
+</div>
+    <div class="form-group mx-sm-3 mb-2">
+        <select id="month" class="form-control" style="width: 150px;" name="month">
+            <option value=""></option>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+    </div>
+    
+    <button type="submit" class="btn btn-primary mr-2 mb-2">Filter</button>
+    <button type="submit" class="btn btn-dark mb-2" onclick="setThisMonth()">This Month</button>
+ 
+    </form>
+</div>
+
+
+<div class="col-xs-10 col-sm-6 col-md-6">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="income_vs_expense"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xs-10 col-sm-6 col-md-6">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="expenses_over_time"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xs-10 col-sm-6 col-md-6">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="income_category"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xs-10 col-sm-6 col-md-6">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="incomes_over_time"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xs-10 col-sm-6 col-md-6">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="expenses_category"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- -------------------------------- -->
+
+{% block javascript %}
+<script>
+
+   function setThisMonth() {
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = today.getMonth() + 1;
+      document.querySelector("#year").value = year;
+      document.querySelector("#month").value = String(month).padStart(2, '0');
+
+    }
+</script>
+    
+<script>
+
+    Chart.scaleService.updateScaleDefaults('linear', {
+            ticks: {
+                min: 0
+            }
+    });
+   
+    let sum_expenses = JSON.parse({{ sum_expenses | tojson }});
+    let sum_incomes = JSON.parse({{ sum_incomes | tojson }});
+
+    let income_vs_expense_chart = new Chart(income_vs_expense, {
+            type: 'pie',
+            data: {
+            labels: ['Expense', 'Income'],
+                datasets: [{
+                    label: "Income Vs Expenses",
+                    data: [sum_expenses, sum_incomes],
+                    backgroundColor: ["#EF5A68", "#53a3fb"
+                    ],
+
+                    borderWidth: 1,
+                    hoverBorderColor: ["black","black"],
+                    hoverBorderWidth: 2,
+                    hoverBackgroundColor: ['#f16059 ', '#53a3fb'],
+                    pointHoverRadius: 5
+                }],
+            },
+            options: {
+                    title: {
+                        display: true,
+                            text: "Income Vs Expenses",
+                                fontSize: 20,
+                    },
+                    legend: {
+                        position: "right",
+                            labels: {
+                            fontColor: "gray"
+                        },
+                        display: true,
+                    },
+
+                    elements: {
+                        hitRadius: 3,
+                    }
+            }
+        });
+
+    let labels = JSON.parse ({{ dates_label | tojson }});
+    let amount = JSON.parse ({{ over_time_expenditure | tojson }});
+
+    new Chart(document.getElementById("expenses_over_time"), {
+            type: "line",
+            data:
+            {
+                    labels: labels,
+                datasets: [{
+                    label: "Expense Over Time (RM)",
+                        
+                        data: amount,
+                    fill: false,
+                    borderColor: "rgb(241, 96, 89)",
+                    lineTension: 0.1
+                }]
+            },
+                options: {}
+        });
+
+    let income_labels = JSON.parse ({{ dates_income | tojson }});
+    let income_amount = JSON.parse ({{ over_time_income | tojson }});
+
+    new Chart(document.getElementById("incomes_over_time"), {
+            type: "line",
+            data:
+            {
+                labels: income_labels,
+                datasets: [{
+                    label: "Income Over Time",
+                    data: income_amount,
+                    fill: false,
+                    borderColor: "rgb(83, 163, 251)",
+                    lineTension: 0.1
+                }]
+            },
+            options: {
+                
+            }
+        });
+       
+    let labels_category = JSON.parse ({{ income_category | tojson }});
+    let category_amount = JSON.parse ({{ income_category_amount | tojson }});
+        
+    new Chart(document.getElementById("income_category"), {
+            type: 'bar',
+            data: {
+            labels: labels_category,
+                datasets: [{
+                    label: '',
+                    data: category_amount,
+                    backgroundColor: ['#FFF689', '#F4D35E', '#FFB88A', '#FF9C5B', '#F67B45', 
+                    '#FBC2C2', '#E39B99', '#CB7876', '#CD4662', '#F3E7D3'],
+                    borderWidth: 1,
+                    hoverBorderColor: "black",
+                    hoverBorderWidth: 2,
+                    pointHoverRadius: 5
+                }],
+                    },
+        options: {
+        title: {
+                 display: true,
+                text: "Income Categories",
+                fontSize: 20,
+                    },
+                        legend: {
+                            position: "right",
+                                labels: {
+                                fontColor: "gray"
+                            },
+                            display:false,
+                    },
+
+                        elements: {
+                            hitRadius: 3,
+                    },
+
+                    }
+                })
+
+    let labels_categorys = JSON.parse ({{ expense_category | tojson }});
+    let categorys_amounts = JSON.parse ({{ expense_category_amount | tojson }});
+        
+    new Chart(document.getElementById("expenses_category"), {
+            type: 'bar',
+            data: {
+            labels: labels_categorys,
+                datasets: [{
+                    label: '',
+                    data: categorys_amounts,
+                    backgroundColor: ['#B4CFA4', '#8BA47C', '#62866C', '#A0C5E3', '#81B2D9', 
+                    '#32769B',  '#BBA6DD', '#8C7DA8', '#64557B', '#1E2136 '],
+
+                    borderWidth: 1,
+                    hoverBorderColor: "black",
+                    hoverBorderWidth: 2,
+                    pointHoverRadius: 5
+                }],
+                    },
+            options: {
+            title: {
+                display: true,
+                text: "Expense Categories",
+                fontSize: 20,
+                    },
+                        legend: {
+                            position: "right",
+                                labels: {
+                                fontColor: "gray"
+                            },
+                            display:false,
+                    },
+
+                        elements: {
+                            hitRadius: 3,
+                    },
+
+                    }
+                })
+
+</script>
+
+
+
+
+{% endblock %}
+{% endblock %}
