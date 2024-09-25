@@ -8,6 +8,7 @@
         <input type="number" min="2000" max="2050" style="width: 150px;"
              class="form-control" name="year" id="year" placeholder="Select Year">
 </div>
+
     <div class="form-group mx-sm-3 mb-2">
         <select id="month" class="form-control" style="width: 150px;" name="month">
             <option value=""></option>
@@ -27,9 +28,14 @@
     </div>
     
     <button type="submit" class="btn btn-primary mr-2 mb-2">Filter</button>
-    <button type="submit" class="btn btn-dark mb-2" onclick="setThisMonth()">This Month</button>
- 
+    <button type="submit" class="btn btn-dark mb-2 mr-2" onclick="setThisMonth()">This Month</button>
+
+    <h3><span id="currentFilter">Showing data for: {{ current_month_year }}</span></h3>
+    
+    </script>
+
     </form>
+
 </div>
 
 
@@ -97,7 +103,7 @@
 
     }
 </script>
-    
+
 <script>
 
     Chart.scaleService.updateScaleDefaults('linear', {
@@ -146,25 +152,6 @@
             }
         });
 
-    let labels = JSON.parse ({{ dates_label | tojson }});
-    let amount = JSON.parse ({{ over_time_expenditure | tojson }});
-
-    new Chart(document.getElementById("expenses_over_time"), {
-            type: "line",
-            data:
-            {
-                    labels: labels,
-                datasets: [{
-                    label: "Expense Over Time (RM)",
-                        
-                        data: amount,
-                    fill: false,
-                    borderColor: "rgb(241, 96, 89)",
-                    lineTension: 0.1
-                }]
-            },
-                options: {}
-        });
 
     let income_labels = JSON.parse ({{ dates_income | tojson }});
     let income_amount = JSON.parse ({{ over_time_income | tojson }});
@@ -186,7 +173,28 @@
                 
             }
         });
-       
+    
+    let labels = JSON.parse ({{ dates_label | tojson }});
+    let amount = JSON.parse ({{ over_time_expenditure | tojson }});
+
+    new Chart(document.getElementById("expenses_over_time"), {
+            type: "line",
+            data:
+            {
+                    labels: labels,
+                datasets: [{
+                    label: "Expense Over Time (RM)",
+                        
+                        data: amount,
+                    fill: false,
+                    borderColor: "rgb(241, 96, 89)",
+                    lineTension: 0.1
+                }]
+            },
+                options: {}
+        });
+
+
     let labels_category = JSON.parse ({{ income_category | tojson }});
     let category_amount = JSON.parse ({{ income_category_amount | tojson }});
         

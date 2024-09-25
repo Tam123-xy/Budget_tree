@@ -332,32 +332,46 @@ def add_income():
 @app.route('/dashboard')
 def dashboard():
 
-    year=request.args.get('year')
-    month=request.args.get('month')
+    def get_month_name(month):
+        month_names = ["", "January", "February", "March", "April", "May", "June", 
+                    "July", "August", "September", "October", "November", "December"]
+        return month_names[int(month)] if month and month.isdigit() else ""
+
+    year = request.args.get('year')
+    month = request.args.get('month')
+    
+
+    if year and month:
+        month_name = get_month_name(month)
+        current_month_year = f"{month_name} {year}"
+    elif year:
+        current_month_year = f"{year}" 
+    elif month:
+        current_month_year = f"{get_month_name(month)}" 
+    else:
+        current_month_year = "Overall data"
+
+
     condition_expense = (1 == 1)
     condition_income = (1 == 1)
+
     if year:
         condition_expense = and_(condition_expense, db.extract('year', add_expenses.date) == year)
         condition_income = and_(condition_income, db.extract('year', add_incomes.date) == year)
+    
     if month:
         condition_expense = and_(condition_expense, db.extract('month', add_expenses.date) == month)
         condition_income = and_(condition_income, db.extract('month', add_incomes.date) == month)
 
-    # piechart
+    
     expenses = db.session.query(db.func.sum(add_expenses.amount)).filter(condition_expense).all()
     expense = [total_expense[0] for total_expense in expenses]
 
+    
     incomes = db.session.query(db.func.sum(add_incomes.amount)).filter(condition_income).all()
     income = [total_income[0] for total_income in incomes]
-
-    # linechart
-    dates = db.session.query(db.func.sum(add_expenses.amount), add_expenses.date).filter(condition_expense).group_by(add_expenses.date).order_by(add_expenses.date).all()
-    over_time_expenditure = []
-    dates_labels = []
-    for amount, date in dates:
-        over_time_expenditure.append(amount)
-        dates_labels.append(date.strftime('%d-%m-%Y'))
-
+    
+    # Line chart (incomes)
     dates_incomes = db.session.query(db.func.sum(add_incomes.amount), add_incomes.date).filter(condition_income).group_by(add_incomes.date).order_by(add_incomes.date).all()
     over_time_expenditure_income = []
     dates_income_labels = []
@@ -365,52 +379,43 @@ def dashboard():
         over_time_expenditure_income.append(amount)
         dates_income_labels.append(date.strftime('%d-%m-%Y'))
 
-    # barchart
-    income_category_amount = db.session.query(add_incomes.category, db.func.sum(add_incomes.amount)).filter(condition_income).group_by(add_incomes.category).all()
+    # Line chart (expenses)
+    dates = db.session.query(db.func.sum(add_expenses.amount), add_expenses.date).filter(condition_expense).group_by(add_expenses.date).order_by(add_expenses.date).all()
+    over_time_expenditure = []
+    dates_labels = []
+    for amount, date in dates:
+        over_time_expenditure.append(amount)
+        dates_labels.append(date.strftime('%d-%m-%Y'))
 
+    # Bar chart (incomes)
+    income_category_amount = db.session.query(add_incomes.category, db.func.sum(add_incomes.amount)).filter(condition_income).group_by(add_incomes.category).all()
     income_category_amounts = []
     income_categorys = []
-
     for category, amount in income_category_amount:
         income_category_amounts.append(amount)
         income_categorys.append(category)
 
+    # Bar chart (expenses)
     expense_category_amount = db.session.query(add_expenses.category, db.func.sum(add_expenses.amount)).filter(condition_expense).group_by(add_expenses.category).all()
-
     expense_category_amounts = []
     expense_categorys = []
+    for category, amount in expense_category_amount:
+        expense_category_amounts.append(amount)
+        expense_categorys.append(category)
 
-    for categoryy, amountt in expense_category_amount:
-        expense_category_amounts.append(amountt)
-        expense_categorys.append(categoryy)
-
-    return render_template('dashboard.html', title="Dashboard",
-                           sum_expenses = json.dumps(expense),
-                           sum_incomes = json.dumps(income),
-                           over_time_expenditure =json.dumps(over_time_expenditure),
-                           dates_label = json.dumps(dates_labels),
-                           over_time_income =json.dumps(over_time_expenditure_income),
-                           dates_income = json.dumps(dates_income_labels),
-                           income_category_amount = json.dumps(income_category_amounts),
-                           income_category = json.dumps(income_categorys),
-                           expense_category_amount = json.dumps(expense_category_amounts),
-                           expense_category = json.dumps(expense_categorys)
-                           )
-
-@app.route('/monthly_charts')
-def monthly_charts():
-    # Get the current month and year
-    current_year = datetime.now().year
-    current_month = datetime.now().month
-    current_year_month = f'{current_year}-{current_month:02d}'
-    print(current_year_month)
-
-    # Query expenses for the current month (assuming SQLite or databases supporting strftime)
-    expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
-    incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
-
-    entries = combine_table(expenses,incomes)
-    return render_template('monthly_charts.html', entries=entries)
+    return render_template('dashboard.html', 
+                           title="Dashboard",
+                           current_month_year=current_month_year,
+                           sum_expenses=json.dumps(expense),
+                           sum_incomes=json.dumps(income),
+                           over_time_expenditure=json.dumps(over_time_expenditure),
+                           dates_label=json.dumps(dates_labels),
+                           over_time_income=json.dumps(over_time_expenditure_income),
+                           dates_income=json.dumps(dates_income_labels),
+                           income_category_amount=json.dumps(income_category_amounts),
+                           income_category=json.dumps(income_categorys),
+                           expense_category_amount=json.dumps(expense_category_amounts),
+                           expense_category=json.dumps(expense_categorys))
 
 @app.route('/search')
 def search():
