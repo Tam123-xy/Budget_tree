@@ -1,6 +1,6 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm, this_month_table_Form, CompareForm
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm
 from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case, and_
 import json
@@ -107,7 +107,6 @@ def set():
     entries = combine_table(expenses,incomes)
     return render_template('default_table.html',entries=entries)
 
-
 @app.route('/set_income', methods=['POST','GET'])
 def set_income():
 
@@ -137,7 +136,6 @@ def set_expense():
 
     return render_template('default_table_expense.html',expenses=expenses)
 
-    
 @app.route('/net_all_table')
 def net_all_table():
 
@@ -153,7 +151,6 @@ def net_all_table():
     net = [round(sum_income[0] - sum_expense[0], 2)]
 
     return render_template('net_all_table.html', sum_expense=sum_expense, sum_income=sum_income, net=net)
-
 
 @app.route('/net_montly_table')
 def net_montly_table():
@@ -180,7 +177,6 @@ def net_yearly_table():
     ).group_by(func.strftime('%Y', net.date)).all()
     
     return render_template('net_yearly_table.html', results=results)
-
 
 @app.route('/default_table')
 def default_table():
@@ -254,8 +250,6 @@ def this_month_table_expense():
 
     return render_template('default_table_expense.html', expenses=expenses)
 
-
-
 @app.route('/last_7days_table')
 def last_7days_table():
 
@@ -310,7 +304,6 @@ def add_expense():
     
     return render_template('add_expense.html', title="Add expense", form=form, expenses=expenses )
     
- 
 @app.route('/addincome', methods = ["POST", "GET"])
 def add_income():
     form = IncomeForm()
@@ -335,7 +328,6 @@ def add_income():
     incomes = add_incomes.query.order_by(add_incomes.date.desc()).all()
     
     return render_template('add_income.html', title="Add income", form=form, incomes=incomes)
-
 
 @app.route('/dashboard')
 def dashboard():
@@ -517,21 +509,20 @@ def edit_category(entry_category,entry_type):
 
     # If the user clicked save button
     if form.validate_on_submit():
-
+        print('save')
         entry = category.query.filter_by(category= entry_category, type=entry_type).first()
         entry.category=form.category.data
+        entry.type=form.type.data
         db.session.commit()
-    
         return redirect(url_for('categoryy'))
     
     return render_template('edit_category.html', form=form)
-
 
 @app.route('/get_record/<int:entry_id>/<string:entry_type>/<float:entry_amount>/<string:entry_date>', methods=['POST', 'GET'])
 def get_record(entry_id, entry_type, entry_amount, entry_date):
 
     entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
-    form = IncomeForm()  
+    form = IncomeForm() 
 
     #To comfirm which model I query based on type (Expense or Income), from its models get the data by its id
     table_name = 'add_expenses' if entry_type == 'Expense' else 'add_incomes'
@@ -580,7 +571,7 @@ def get_record(entry_id, entry_type, entry_amount, entry_date):
         next_page = request.args.get('next', '/')
     
         return redirect(next_page)
-
+    
 
     return render_template('edit.html', form=form)
 
@@ -616,7 +607,6 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     
     # Redirect to the specified page
     return redirect(next_page)
-
 
 @app.route('/tree', methods=['POST', 'GET'])
 def tree():
@@ -765,8 +755,9 @@ def edit_goal(entry_id):
         form.amount.data = result[1]  
         form.month.data = result[2]
         form.year.data = result[3]
-    
+
     if form.validate_on_submit():
+        print('save')
 
         goal_entry = goal.query.get(entry_id)
 
@@ -778,8 +769,9 @@ def edit_goal(entry_id):
 
         return redirect(url_for('compare'))
 
-
     return render_template('edit_goal.html', form=form)
+
+    
 
 @app.route('/tree_goal/<int:entry_id>', methods=['GET'])
 def tree_goal(entry_id):
