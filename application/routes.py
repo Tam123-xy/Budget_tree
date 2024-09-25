@@ -732,7 +732,7 @@ def compare():
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
 
-    return render_template('compare_goal.html', amounts=amounts)
+    return render_template('goal.html', amounts=amounts)
 
 @app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
 def delete_goal(entry_id):
