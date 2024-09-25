@@ -1,6 +1,6 @@
 from application import app , db
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm, create_categoryFormm
 from application.models import add_expenses, add_incomes, goal, net, category
 from sqlalchemy import func, case, and_
 import json
@@ -496,7 +496,7 @@ def delete_category(entry_category,entry_type):
 
 @app.route('/edit_category/<string:entry_category>/<string:entry_type>', methods=['POST', 'GET'])
 def edit_category(entry_category,entry_type):
-    form = create_categoryForm()
+    form = create_categoryFormm()
 
     # Query based on type (Expense or Income) and category
     sql_query = text('SELECT * FROM category WHERE type = :entry_type AND category = :entry_category')
@@ -504,7 +504,6 @@ def edit_category(entry_category,entry_type):
 
     # Pre-fill form fields with the festched result
     if request.method == 'GET':
-        form.type.data = result[1]  
         form.category.data = result[2]  
 
     # If the user clicked save button
@@ -512,7 +511,7 @@ def edit_category(entry_category,entry_type):
         print('save')
         entry = category.query.filter_by(category= entry_category, type=entry_type).first()
         entry.category=form.category.data
-        entry.type=form.type.data
+        print(entry_type)
         db.session.commit()
         return redirect(url_for('categoryy'))
     
@@ -732,7 +731,7 @@ def compare():
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
 
-    return render_template('goal.html', amounts=amounts)
+    return render_template('compare_goal.html', amounts=amounts)
 
 @app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
 def delete_goal(entry_id):
