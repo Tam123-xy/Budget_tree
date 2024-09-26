@@ -636,7 +636,6 @@ def edit_category(entry_category,entry_type):
 
     # Pre-fill form fields with the festched result
     if request.method == 'GET':
-        form.type.data = result[1]  
         form.category.data = result[2]  
 
     # If the user clicked save button
@@ -644,7 +643,7 @@ def edit_category(entry_category,entry_type):
         print('save')
         entry = category.query.filter_by(category= entry_category, type=entry_type, user_id=current_user.id).first()
         entry.category=form.category.data
-        entry.type=form.type.data
+        print(entry_type)
         db.session.commit()
         return redirect(url_for('categoryy'))
     
@@ -752,6 +751,8 @@ def tree():
     month = datetime.now().month
     current_year_month = f'{year}-{int(month):02d}'
 
+    current_date = datetime.now().strftime("%Y-%m-%d")
+
     # Query this goal model with condition of current month and year
     current_goal = goal.query.filter_by(month=month, year=year, user_id=current_user.id).first()
     print(current_goal)
@@ -821,7 +822,7 @@ def tree():
 
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_date)
 
 @app.route('/compare', methods=['GET', 'POST'])
 @login_required
