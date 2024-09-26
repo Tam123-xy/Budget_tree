@@ -1,11 +1,7 @@
 <div class="progress-section">
-    <h3>Your Goal for This Month:</h3>
+    <h3>Your Goal for {{ current_year_month }}</h3>
     <table class="table">
         <tbody>
-            <tr>
-                <th>Date</th>
-                <td>{{ current_year_month }}</td>
-            </tr>
             <tr>
                 <th>Goal</th>
                 <td>RM {{ goal_amount|round(2) }}</td>
@@ -14,12 +10,12 @@
                 <th>Current Saving</th>
                 <td>RM {{ net|round(2) }}</td>
             </tr>
-            {% if progres %}
+
             <tr>
                 <th>Progress</th>
-                <td>{{ progres | round(2) }} %</td>
+                <td>{{ progress | round(2) }} %</td>
             </tr>
-            {% endif %}
+
         </tbody>
     </table>
     <img src="{{ url_for('static', filename=image) }}" class="img-fluid" alt="Tree Progress">

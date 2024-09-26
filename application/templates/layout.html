@@ -36,6 +36,7 @@
                 <header class="mb-4">
                     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
                         <a class="navbar-brand" href="{{ url_for('index') }}">Transaction History</a>
+                        <a class="navbar-brand" href="{{ url_for('dashboard') }}">| Dashboard</a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
                             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
@@ -43,11 +44,11 @@
                         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                             <div class="navbar-nav ml-auto mr-3">
                                 <a class="nav-item nav-link" href="{{ url_for('add_income') }}">Income</a>
-                                <a class="nav-item nav-link" href="{{ url_for('add_expense') }}">Expense</a>
-                                <a class="nav-item nav-link" href="{{ url_for('categoryy') }}">Category</a>
-                                <a class="nav-item nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
-                                <a class="nav-item nav-link" href="{{ url_for('tree') }}">Tree</a>
-                                <a class="nav-item nav-link" href="{{ url_for('compare') }}">Goals</a>
+                                <a class="nav-item nav-link" href="{{ url_for('add_expense') }}">| Expense</a>
+                                <a class="nav-item nav-link" href="{{ url_for('categoryy') }}">| Category</a>
+                                <a class="nav-item nav-link" href="{{ url_for('tree') }}">| Tree</a>
+                                <a class="nav-item nav-link" href="{{ url_for('compare') }}">| Goals</a>
+                                <a class="nav-item nav-link" href="{{ url_for('account') }}">| Account</a>
                             </div>
                         </div>
                     </nav>
@@ -69,8 +70,6 @@
                 {% block content %}{% endblock %}
             </div>
         </div>
-        
-
         
 
     </div>
