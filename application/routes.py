@@ -1,6 +1,6 @@
 from application import app , db, bcrypt
 from flask import render_template, url_for, redirect,flash, request
-from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm, RegisterForm, LoginForm
+from application.form import ExpenseForm, IncomeForm, GoalForm, create_categoryForm, RegisterForm, LoginForm,create_categoryFormm
 from application.models import add_expenses, add_incomes, goal, net, category, User
 from sqlalchemy import func, case, and_
 import json
@@ -628,10 +628,10 @@ def delete_category(entry_category,entry_type):
 @app.route('/edit_category/<string:entry_category>/<string:entry_type>', methods=['POST', 'GET'])
 @login_required
 def edit_category(entry_category,entry_type):
-    form = create_categoryForm()
+    form = create_categoryFormm()
 
     # Query based on type (Expense or Income) and category
-    sql_query = text('SELECT * FROM category WHERE type = :entry_type AND category = :entry_category AND user_id =: user_id')
+    sql_query = text('SELECT * FROM category WHERE type = :entry_type AND category = :entry_category AND user_id = :user_id')
     result = db.session.execute(sql_query, {'entry_type': entry_type, 'entry_category': entry_category, 'user_id':current_user.id}).fetchone()
 
     # Pre-fill form fields with the festched result
@@ -643,6 +643,7 @@ def edit_category(entry_category,entry_type):
         print('save')
         entry = category.query.filter_by(category= entry_category, type=entry_type, user_id=current_user.id).first()
         entry.category=form.category.data
+        entry.user_id=current_user.id
         print(entry_type)
         db.session.commit()
         return redirect(url_for('categoryy'))
@@ -751,8 +752,6 @@ def tree():
     month = datetime.now().month
     current_year_month = f'{year}-{int(month):02d}'
 
-    current_date = datetime.now().strftime("%Y-%m-%d")
-
     # Query this goal model with condition of current month and year
     current_goal = goal.query.filter_by(month=month, year=year, user_id=current_user.id).first()
     print(current_goal)
@@ -822,7 +821,7 @@ def tree():
 
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_date)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month)
 
 @app.route('/compare', methods=['GET', 'POST'])
 @login_required
@@ -867,7 +866,7 @@ def compare():
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
 
-    return render_template('compare_goal.html', amounts=amounts)
+    return render_template('goal.html', amounts=amounts)
 
 @app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
 @login_required
@@ -935,6 +934,7 @@ def tree_goal(entry_id):
     if goal_amount == 0:
         image = "tree_images/tree1.png"
         progress = 0
+
     else:
         progress = (current_saving / goal_amount) * 100
         if progress <= 25:

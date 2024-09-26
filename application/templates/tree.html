@@ -41,13 +41,9 @@
 </div>
 
 <div class="container">
-    <h3>Your Goal for This Month:</h3>
+    <h3>Your Goal for This Month ({{ current_date }}):</h3>
     <table class="table">
         <tbody>
-            <tr>
-                <th>Date</th>
-                <td>{{ current_date }}</td>
-            </tr>
             <tr>
                 <th>Goal</th>
                 <td>RM {{ goal }}</td>
@@ -56,12 +52,12 @@
                 <th>Current Saving</th>
                 <td>RM {{ net_monthly_table }}</td>
             </tr>
-            {% if progres %}
+
             <tr>
                 <th>Progress</th>
                 <td>{{ progres | round(2) }} %</td>
             </tr>
-            {% endif %}
+
         </tbody>
     </table>
     <img src="{{ url_for('static', filename=image) }}" class="img-fluid" alt="Tree Progress">
