@@ -57,7 +57,7 @@
                             <input type='text' class="input" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
                             <button type='button' hx-get="/default_table" hx-target="#results">All</button>
                             <button type='button' hx-get="/this_month_table" hx-target="#results">This month</button>
-                            <button type='button' hx-get="/last_7days_table_income" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                            <button type='button' hx-get="/last_7days_table" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
                             <label for="month">Month:</label>
                             <select name="month" id="month" multiple>
                                 <option value="1">January</option>
@@ -96,6 +96,7 @@
                 </thead>
                 
                 <tbody id="results">
+                {% if entries %}
                     {% for entry in entries %}
                             <tr>
                                 <th scope="row">{{loop.index}}</th>
@@ -113,6 +114,11 @@
                                 <td><a href="{{ url_for('delete', entry_id=entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('index')) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
                             </tr>
                     {% endfor %}
+                {% else %}
+                    <tr> 
+                        <td colspan="4">No records found. Let's start recording your expenses and incomes.</td>
+                    </tr>
+                {% endif %}
                 </tbody>
             </table>
         </section>     
