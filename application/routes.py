@@ -121,9 +121,6 @@ def register():
         db.session.add(new_user)
         db.session.commit()  # Commit the new user to get the user ID
 
-        # Flash success message with corrected grammar
-        flash(f"You have successfully registered the account {form.username.data}.", "success")
-
         # Add default categories for the new user
         for cat in DEFAULT_CATEGORIES:
             category_entry = category(type=cat["type"], category=cat["category"], user_id=new_user.id)
@@ -132,8 +129,10 @@ def register():
         # Commit all categories at once
         db.session.commit()
 
-        return redirect(url_for('login'))
-
+        login_user(new_user)
+        flash(f"You have successfully registered and login account {form.username.data}.", "success")
+        return redirect(url_for('index'))
+        
     return render_template('register.html', form=form)
 
 @app.route('/logout', methods =['GET', 'POST'])
@@ -200,8 +199,10 @@ def set():
    
     expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
     incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date, ) == current_year_month, add_incomes.user_id == current_user.id)).all()
+    
     entries = combine_table(expenses,incomes)
-    return render_template('default_table.html',entries=entries)
+      
+    return render_template('default_table.html',entries=entries, current_year_month=current_year_month)
 
 @app.route('/set_income', methods=['POST','GET'])
 @login_required
@@ -218,7 +219,7 @@ def set_income():
     incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date) == current_year_month , add_incomes.user_id == current_user.id)).all()
     incomes.sort(key=lambda x: x.date, reverse=True)
 
-    return render_template('default_table_income.html',incomes=incomes)
+    return render_template('default_table_income.html',incomes=incomes, current_year_month=current_year_month)
 
 @app.route('/set_expense', methods=['POST','GET'])
 @login_required
@@ -232,7 +233,7 @@ def set_expense():
     expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
     expenses.sort(key=lambda x: x.date, reverse=True)
 
-    return render_template('default_table_expense.html',expenses=expenses)
+    return render_template('default_table_expense.html',expenses=expenses,current_year_month=current_year_month)
 
 @app.route('/net_all_table')
 @login_required
@@ -323,14 +324,13 @@ def this_month_table():
     current_year_month = f'{current_year}-{current_month:02d}'
 
     # Query both models with the condition of year-month 
-    # expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
     expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
     incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date, ) == current_year_month, add_incomes.user_id == current_user.id)).all()
-    # incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
+   
 
     # Combine the the results of query 
     entries = combine_table(expenses,incomes)
-    return render_template('default_table.html', entries=entries)
+    return render_template('default_table.html', entries=entries, current_year_month='this month')
 
 @app.route('/this_month_table_income')
 @login_required
@@ -342,11 +342,10 @@ def this_month_table_income():
     current_year_month = f'{current_year}-{current_month:02d}'
 
     # Query add_incomes models with the condition of year-month, sort it by date in descending order
-    # incomes = add_incomes.query.filter(func.strftime('%Y-%m', add_incomes.date) == current_year_month).all()
     incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date, ) == current_year_month, add_incomes.user_id == current_user.id)).all()
     incomes.sort(key=lambda x: x.date, reverse=True)
 
-    return render_template('default_table_income.html', incomes=incomes)
+    return render_template('default_table_income.html', incomes=incomes, current_year_month='this month')
 
 @app.route('/this_month_table_expense')
 @login_required
@@ -359,11 +358,10 @@ def this_month_table_expense():
     print(current_year_month)
 
     # Query add_expenses models with the condition of year-month, sort it by date in descending order
-    # expenses = add_expenses.query.filter(func.strftime('%Y-%m', add_expenses.date) == current_year_month).all()
     expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
     expenses.sort(key=lambda x: x.date, reverse=True)
 
-    return render_template('default_table_expense.html', expenses=expenses)
+    return render_template('default_table_expense.html', expenses=expenses, current_year_month='this month')
 
 @app.route('/last_7days_table')
 @login_required
@@ -371,12 +369,11 @@ def last_7days_table():
 
     # Querying both models with the condition of date, only want last 7 days of data
     expenses = add_expenses.query.filter(and_(add_expenses.date > date.today() - timedelta(weeks=1), add_expenses.user_id == current_user.id) ).all()
-    # incomes = add_incomes.query.filter(add_incomes.date > date.today() - timedelta(weeks=1) ).all()
     incomes = add_incomes.query.filter(and_(add_incomes.date > date.today() - timedelta(weeks=1), add_incomes.user_id == current_user.id) ).all()
 
     # Combine the results of query
     entries = combine_table(expenses,incomes)
-    return render_template('default_table.html', entries=entries)
+    return render_template('default_table.html', entries=entries, current_year_month='last 7 days')
 
 @app.route('/last_7days_table_income')
 @login_required
@@ -386,18 +383,17 @@ def last_7days_table_income():
     incomes = add_incomes.query.filter(and_(add_incomes.date > date.today() - timedelta(weeks=1), add_incomes.user_id == current_user.id) ).all()
     incomes.sort(key=lambda x: x.date, reverse=True)
 
-    return render_template('default_table_income.html', incomes=incomes)
+    return render_template('default_table_income.html', incomes=incomes,  current_year_month='last 7 days')
 
 @app.route('/last_7days_table_expense')
 @login_required
 def last_7days_table_expense():
 
     # Querying add_expenses models with the condition of date, only want last 7 days of data, sort it by date in descending order
-    # expenses = add_expenses.query.filter(add_expenses.date > date.today() - timedelta(weeks=1) ).all()
     expenses = add_expenses.query.filter(and_(add_expenses.date > date.today() - timedelta(weeks=1), add_expenses.user_id == current_user.id) ).all()
     expenses.sort(key=lambda x: x.date, reverse=True)
 
-    return render_template('default_table_expense.html', expenses=expenses)
+    return render_template('default_table_expense.html', expenses=expenses, current_year_month='last 7 days')
 
 @app.route('/addexpense', methods = ["POST", "GET"])
 @login_required
@@ -560,7 +556,7 @@ def search():
     else:
         results = []
 
-    return render_template('search_result.html', results=results)
+    return render_template('search_result.html', results=results,q=q)
 
 @app.route('/search_income')
 @login_required
@@ -576,7 +572,7 @@ def search_income():
     else:
         results = []
 
-    return render_template('search_income.html', results=results)
+    return render_template('search_result.html', results=results, q=q)
 
 @app.route('/search_expense')
 @login_required
@@ -592,7 +588,7 @@ def search_expense():
     else:
         results = []
 
-    return render_template('search_result.html', results=results)
+    return render_template('search_result.html', results=results, q=q)
     
 @app.route('/category', methods = ["POST", "GET"])
 @login_required
@@ -967,7 +963,7 @@ def this_year_goaltable():
     amounts = goal_net(net_query,goall)
 
     # Combine the results and render template
-    return render_template('this_year_goaltable.html', amounts=amounts)
+    return render_template('this_year_goaltable.html', amounts=amounts, current_year_month='this year')
 
 @app.route('/all_goaltable')
 @login_required
@@ -991,20 +987,20 @@ def search_year_month():
 
     month = request.form.get('month')
     year = request.form.get('year')
+    current_year_month = f'{year}-{int(month):02d}'
 
-    if month == 'all':
-
+    if month=='13':
         goall = goal.query.filter(and_(goal.year == year, goal.user_id == current_user.id)).all()
 
         # Query to sum the amount in the 'net' model, grouped by year-month
         net_query = db.session.query(
             func.sum(net.amount).label('total'),
             func.strftime('%Y-%m', net.date).label('month_year')
-        ).filter(and_(func.strftime('%Y', net.date) == year, net.user_id == current_user.id).group_by(func.strftime('%Y-%m', net.date))).all()
+        ).filter(and_(func.strftime('%Y', net.date) == year, net.user_id == current_user.id)).group_by(func.strftime('%Y-%m', net.date)).all()
 
     else:
-
         current_year_month = f'{year}-{int(month):02d}'
+        print(current_year_month)
 
         goall = goal.query.filter( and_(goal.month == month, goal.year == year, goal.user_id == current_user.id)).all()
 
@@ -1017,4 +1013,4 @@ def search_year_month():
     amounts = goal_net(net_query,goall)
 
    
-    return render_template('this_year_goaltable.html',amounts=amounts)
+    return render_template('this_year_goaltable.html',amounts=amounts, current_year_month=current_year_month)
