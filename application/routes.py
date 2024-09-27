@@ -987,9 +987,9 @@ def search_year_month():
 
     month = request.form.get('month')
     year = request.form.get('year')
-    current_year_month = f'{year}-{int(month):02d}'
 
     if month=='13':
+        current_year_month = f'all months of year {year}'
         goall = goal.query.filter(and_(goal.year == year, goal.user_id == current_user.id)).all()
 
         # Query to sum the amount in the 'net' model, grouped by year-month
