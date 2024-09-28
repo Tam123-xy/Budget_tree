@@ -824,7 +824,7 @@ def tree():
 
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, message=message)
 
 @app.route('/compare', methods=['GET', 'POST'])
 @login_required
