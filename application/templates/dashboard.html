@@ -2,6 +2,7 @@
 {% block content %}
 
 
+<!-- buttons --> 
 <div class="col-xs-12 col-sm-12 col-md-12">
     <form class="form-inline" action="{{ url_for('dashboard') }}" method="GET">
         <div class="form-group mb-2">
@@ -38,7 +39,7 @@
 
 </div>
 
-
+<!-- containers --> 
 <div class="col-xs-10 col-sm-6 col-md-6">
     <div class="card card-style mb-2">
         <div class="card-body">
@@ -92,6 +93,7 @@
 <!-- -------------------------------- -->
 
 {% block javascript %}
+
 <script>
 
    function setThisMonth() {
@@ -104,6 +106,7 @@
     }
 </script>
 
+<!-- charts --> 
 <script>
 
     Chart.scaleService.updateScaleDefaults('linear', {
