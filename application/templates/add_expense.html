@@ -99,18 +99,24 @@
                 </tr>
             </thead>
             <tbody id="results">
-                {% for entry in expenses %}
-                        <tr>
-                            <th scope="row">{{loop.index}}</th>
-                            <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
-                            <td>{{entry.type}}</td>
-                            <td>{{entry.category }}</td>
-                            <td>{{entry.nota }}</td>
-                            <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(entry.amount) }}</span></td>
-                            <td><a href="{{ url_for('get_record', entry_id=entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_expense')) }}"   class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
-                            <td><a href="{{ url_for('delete', entry_id=entry.id, entry_type=entry.type, entry_amount=entry.amount, entry_date=entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_expense'), type='Expense') }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
-                        </tr>
-                {% endfor %}
+                {% if expenses %}
+                    {% for entry in expenses %}
+                            <tr>
+                                <th scope="row">{{loop.index}}</th>
+                                <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
+                                <td>{{entry.type}}</td>
+                                <td>{{entry.category }}</td>
+                                <td>{{entry.nota }}</td>
+                                <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(entry.amount) }}</span></td>
+                                <td><a href="{{ url_for('get_record', entry_id=entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_expense')) }}"   class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
+                                <td><a href="{{ url_for('delete', entry_id=entry.id, entry_type=entry.type, entry_amount=entry.amount, entry_date=entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_expense'), type='Expense') }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
+                            </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr> 
+                        <td colspan="4">No expense records found. Let's start recording your expenses.</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </section>

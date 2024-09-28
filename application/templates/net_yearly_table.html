@@ -1,7 +1,14 @@
-{% for entry in results %}
+{% if results %}
+    {% for entry in results %}
+        <tr>
+            <td>{{ entry.year}}</td> 
+            <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.total_income) }}</span></td>
+            <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(entry.total_expense) }}</span></td>
+            <td class="amount-field">{{  'RM ' + "{:.2f}".format(entry.total) }}</td>
+    {% endfor %}
+{% else %}
     <tr>
-        <td>{{ entry.year}}</td> 
-        <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.total_income) }}</span></td>
-        <td class="amount-field">RM <span style="color: rgb(223, 20, 20);">{{ "{:.2f}".format(entry.total_expense) }}</span></td>
-        <td class="amount-field">{{  'RM ' + "{:.2f}".format(entry.total) }}</td>
-{% endfor %}
+        <td colspan="4">No records for yearly.</td>
+    </tr>
+{% endif %}
+

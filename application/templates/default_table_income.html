@@ -1,12 +1,23 @@
-{% for entry in incomes %}
-        <tr>
-            <th scope="row">{{loop.index}}</th>
-            <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
-            <td>{{entry.type}}</td>
-            <td>{{entry.category }}</td>
-            <td>{{entry.nota }}</td>
-            <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
-            <td><a href="{{ url_for('get_record', entry_id=entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_income')) }}"   class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
-            <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_income')) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
-        </tr>
-{% endfor %}
+{% if incomes %}
+    {% for entry in incomes %}
+            <tr>
+                <th scope="row">{{loop.index}}</th>
+                <td>{{entry.date.strftime("%d-%m-%Y")}}</td>
+                <td>{{entry.type}}</td>
+                <td>{{entry.category }}</td>
+                <td>{{entry.nota }}</td>
+                <td class="amount-field">RM <span style="color: rgb(49, 81, 207);">{{ "{:.2f}".format(entry.amount) }}</span></td>
+                <td><a href="{{ url_for('get_record', entry_id=entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_income')) }}"   class="edit" title="Edit" data-toggle="tooltip" id="1"><i class="fa fa-pencil" style="color: rgb(0, 0, 0);"></i></a></td>
+                <td><a href="{{ url_for('delete', entry_id = entry.id, entry_type = entry.type, entry_amount = entry.amount, entry_date = entry.date.strftime('%Y-%m-%d %H:%M:%S'), next=url_for('add_income')) }}" class="delete" title="Delete" data-toggle="tooltip" id="1"><i class="fa-solid fa-trash" style="color: rgb(172, 25, 25);"></i></a></td>
+            </tr>
+    {% endfor %}
+
+{% elif current_year_month %}
+    <tr>
+        <td colspan="4">No income records for {{ current_year_month }}.</td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="4">No income records found. Let's start recording your incomes.</td>
+    </tr>
+{% endif %}
