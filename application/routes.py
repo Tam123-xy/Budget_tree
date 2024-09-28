@@ -13,6 +13,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Create a list for default categories
 DEFAULT_CATEGORIES = [
     {"type": "Expense", "category": "🏡Rent"},
     {"type": "Expense", "category": "🍴 Food and Beverage"},
@@ -24,6 +25,7 @@ DEFAULT_CATEGORIES = [
     {"type": "Income", "category": "🤑Sideline"}
 ]
 
+# Combine expenses and incomes
 def combine_table(expenses,incomes):
     # Combine the entries
     entries = []
@@ -128,7 +130,8 @@ def register():
         # Commit all categories at once
         db.session.commit()
 
-        login_user(new_user)
+        # log in new user
+        login_user(new_user) 
         flash(f"You have successfully registered and login account {form.username.data}.", "success")
         return redirect(url_for('index'))
         
@@ -146,7 +149,7 @@ def logout():
 def delete_account():
     user = User.query.get(current_user.id)
 
-    # Delete the user's associated data (e.g., categories, transactions, etc.)
+    # Delete the user's associated data (e.g., categories, add_expenses, etc.)
     category.query.filter_by(user_id=user.id).delete()
     add_expenses.query.filter_by(user_id=user.id).delete()
     add_incomes.query.filter_by(user_id=user.id).delete()
@@ -164,7 +167,7 @@ def delete_account():
 @app.route('/account')
 @login_required
 def account():
-    return render_template('account.html', username=current_user.username)
+    return render_template('account.html', username=current_user.username,title="Account")
 
 @app.route('/index', methods = ["POST", "GET"])
 @login_required
@@ -417,7 +420,7 @@ def add_expense():
     # Query add_expenses models, sort it by date in descending order
     expenses = add_expenses.query.filter_by(user_id=current_user.id).order_by(add_expenses.date.desc()).all()
     
-    return render_template('add_expense.html', title="Add expense", form=form, expenses=expenses )
+    return render_template('add_expense.html', title="Expense", form=form, expenses=expenses )
     
 @app.route('/addincome', methods = ["POST", "GET"])
 @login_required
@@ -443,7 +446,7 @@ def add_income():
     # Query add_incomes models, sort it by date in descending order
     incomes = add_incomes.query.filter_by(user_id=current_user.id).order_by(add_incomes.date.desc()).all()
     
-    return render_template('add_income.html', title="Add income", form=form, incomes=incomes)
+    return render_template('add_income.html', title="Income", form=form, incomes=incomes)
 
 @app.route('/dashboard')
 @login_required
@@ -605,7 +608,7 @@ def categoryy():
     income = db.session.query(category.category, category.type).filter(and_(category.type == 'Income' ,category.user_id == current_user.id)).all()
     expense = db.session.query(category.category, category.type).filter(and_(category.type == 'Expense',category.user_id == current_user.id)).all()
     
-    return render_template('category.html', title="Create Category", form=form, income=income, expense=expense)
+    return render_template('category.html', form=form, income=income, expense=expense, title="Category")
 
 @app.route('/delete/<string:entry_category>/<string:entry_type>', methods=['POST', 'GET'])
 @login_required
@@ -823,7 +826,7 @@ def tree():
 
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month, message=message)
+    return render_template('tree.html', title="Tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month, message=message)
 
 @app.route('/compare', methods=['GET', 'POST'])
 @login_required
@@ -868,7 +871,7 @@ def compare():
 
         amounts.sort(key=lambda x: x['month_year'], reverse=True)
 
-    return render_template('goal.html', amounts=amounts)
+    return render_template('goal.html', amounts=amounts, title="Goals")
 
 @app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
 @login_required
@@ -897,7 +900,6 @@ def edit_goal(entry_id):
         form.year.data = result[3]
 
     if form.validate_on_submit():
-        print('save')
 
         goal_entry = goal.query.get(entry_id)
 
