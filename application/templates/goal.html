@@ -14,8 +14,8 @@
     <div class="column is-one-third is-offset-one-third">
         <form hx-post="/search_year_month" hx-target="#results" hx-swap="innerHTML">
             <row>
-                <button type='button' hx-get="/all_goaltable" hx-target="#results">All</button>
-                <button type='button' hx-get="/this_year_goaltable" hx-target="#results">This year</button></row>
+                <button type='button' class="btn btn-outline-success btn-sm mb-2"hx-get="/all_goaltable" hx-target="#results">All</button>
+                <button type='button' class="btn btn-outline-success btn-sm mb-2" hx-get="/this_year_goaltable" hx-target="#results">This year</button></row>
                 ⠀⠀⠀⠀⠀
                 <label for="month">Month:</label>
                 <select name="month" id="month" multiple>
