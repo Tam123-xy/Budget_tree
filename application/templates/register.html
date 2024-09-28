@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+
+  <br><br><br>
+  <h1 style="text-align: center;">Welcome to Budget Tree app!</h1>
+  <br>
+  
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            {% with messages = get_flashed_messages(with_categories = True) %}
+                {% if messages %}  
+                    {% for category, message in messages %}
+                        <div class="alert {{ 'alert-' + category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <div class="col-xs-8 col-sm-4 col-md-4 col-lg-3 ml-auto mr-auto">
+        <div class="card card-style mb-2">
+            <div class="card-body">
+              <form action="" method="POST">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                  <legend class="mb-4">Register</legend>
+             
+              
+                  <div class="form-group">
+                        {{ form.username.label }} 
+                        {{ form.username(class="form-control") }}
+                        {% for error in form.username.errors %}
+                            <span style="color: red;">{{ error }}</span>
+                        {% endfor %}
+                  </div>
+    
+                  <div class="form-group">
+                        {{ form.password.label }} 
+                        {{ form.password(class="form-control") }} 
+                  </div>
+    
+                  <div class="form-group border-bottom pb-3">
+                        {{ form.submit(class="btn btn-outline-info")}}
+                  </div>
+
+                  <a href="{{url_for('login')}}">Alreday have an account? Log In</a>
+              </form>
+            </div>
+        </div>
+    </div>
+
+</body>
