@@ -14,7 +14,7 @@
                 {% endif %}
                 
                 <td>
-                    <a hx-get="{{ url_for('tree_goal', entry_id=entry.id) }}" hx-target="#goal-image-section" hx-swap="innerHTML">
+                    <a hx-get="{{ url_for('tree_button', entry_id=entry.id) }}" hx-target="#goal-image-section" hx-swap="innerHTML">
                         <i class="fa-solid fa-tree" style="color: rgb(0, 100, 38);"></i>
                     </a>                            
                 </td>
