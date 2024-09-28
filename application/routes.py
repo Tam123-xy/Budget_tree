@@ -13,7 +13,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Define default categories (including their types, e.g., Income or Expense)
 DEFAULT_CATEGORIES = [
     {"type": "Expense", "category": "🏡Rent"},
     {"type": "Expense", "category": "🍴 Food and Beverage"},
@@ -771,36 +770,36 @@ def tree():
         current_saving = result[0]
         
 
-    print(f'current_saving{current_saving}')
-
     if goal_amount == 0 :
-        image = "tree_images/tree1.png" 
+        image = "tree_images/tree_die.jpg"
+        message = f"Set a goal for this month!"
         progress = 0
-        message = "Set your goal to start growing!"
+
+    elif current_saving <= 0 :
+        image = "tree_images/tree_die.jpg"
+        message = f"Take your first step to save RM {goal_amount}!"
+        progress = 0
 
     else:  # Avoid division by zero
         progress = (current_saving / goal_amount) * 100
-        print(f'Progress: {progress}%')
 
-        if progress < 0:
-            image = "tree_images/tree_die.jpg"
-            
-        elif progress <= 25:
+        if progress <= 25:
             image = "tree_images/tree1.png"
-            message = "Every little step counts. Keep going!"
-
+            message = f"Every little step counts. Keep going to save RM {goal_amount-current_saving}!"
+            
         elif progress <= 60:
             image = "tree_images/tree2.png"
-            message = "You're halfway there! Stay focused!"
-            
-        elif progress <=99:
+            message = f"You're halfway to saving RM {goal_amount}! Stay focused and try to save RM {goal_amount-current_saving} more!"
+
+        elif progress < 100:
             image = "tree_images/tree3.png"
-            message = "Almost there! Just a little more!"
-   
+            message = f"Almost there! Just RM {goal_amount-current_saving} left!"
+            
         else:
             progress = 100
             image = "tree_images/tree_goal.jpg" 
-            message = "Congratulations! You've achieved your goal!"   
+            message = f"Congratulations! You've achieved your goal RM {goal_amount}!"   
+        
 
     if form.validate_on_submit():
 
@@ -824,7 +823,7 @@ def tree():
 
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, message=message)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month, message=message)
 
 @app.route('/compare', methods=['GET', 'POST'])
 @login_required
@@ -934,25 +933,32 @@ def tree_goal(entry_id):
     print(f"goal_amount{goal_amount},current_year_month{current_year_month},net{current_saving}")
 
 
-    if goal_amount == 0:
-        image = "tree_images/tree1.png"
+    if current_saving <= 0 :
+        image = "tree_images/tree_die.jpg"
+        message = f"Take your first step to save RM {goal_amount}!"
         progress = 0
 
     else:
         progress = (current_saving / goal_amount) * 100
-        if progress < 0:
-            image = "tree_images/tree_die.jpg"
-        elif progress <= 25:
+
+        if progress <= 25:
             image = "tree_images/tree1.png"
+            message = f"Every little step counts. Keep going to save RM {goal_amount-current_saving}!"
+            
         elif progress <= 60:
             image = "tree_images/tree2.png"
-        elif progress <= 99:
-            image = "tree_images/tree3.png"
-        else:
-            image = "tree_images/tree_goal.jpg"
-            progress = 100
+            message = f"You're halfway to saving RM {goal_amount}! Stay focused and try to save RM {goal_amount-current_saving} more!"
 
-    return render_template('goal_progress.html', image=image, progress=progress, goal_amount=goal_amount, current_year_month=current_year_month, net=current_saving)
+        elif progress < 100:
+            image = "tree_images/tree3.png"
+            message = f"Almost there! Just RM {goal_amount-current_saving} left!"
+            
+        else:
+            progress = 100
+            image = "tree_images/tree_goal.jpg" 
+            message = f"Congratulations! You've achieved your goal RM {goal_amount}!"
+
+    return render_template('goal_progress.html', image=image, progress=progress, goal_amount=goal_amount, current_year_month=current_year_month, net=current_saving,message=message)
 
 @app.route('/this_year_goaltable')
 @login_required
