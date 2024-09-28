@@ -59,14 +59,10 @@
                 <div class="column is-one-third is-offset-one-third">
                     <form hx-post="/set_income" hx-target="#results" hx-swap="innerHTML">
                         <row>
-                            <input type='text' class="btn btn-outline-primary btn-sm mb-2" 
-                            class="input" placeholder="Search" name="q" hx-get="/search_income" hx-trigger="keyup changed delay:500ms" hx-target="#results">
-                            <button type='button' class="btn btn-outline-primary btn-sm mb-2" 
-                            hx-get="/default_table_income" hx-target="#results">All</button>
-                            <button type='button' class="btn btn-outline-primary btn-sm mb-2"
-                            hx-get="/this_month_table_income" hx-target="#results">This month</button>
-                            <button type='button' class="btn btn-outline-primary btn-sm mb-2"
-                            hx-get="/last_7days_table_income" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                            <input type='text' class="btn btn-outline-primary btn-sm mb-2" class="input" placeholder="Search" name="q" hx-get="/search_income" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+                            <button type='button' class="btn btn-outline-primary btn-sm mb-2" hx-get="/default_table_income" hx-target="#results">All</button>
+                            <button type='button' class="btn btn-outline-primary btn-sm mb-2"hx-get="/this_month_table_income" hx-target="#results">This month</button>
+                            <button type='button' class="btn btn-outline-primary btn-sm mb-2"hx-get="/last_7days_table_income" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
                             <label for="month">Month:</label>
 
                             <select name="month" id="month" multiple>
@@ -85,10 +81,8 @@
                             </select>
 
                             <label for="year">Year:</label>
-                            <input type="number" class="btn btn-outline-primary btn-sm mb-2"
-                            id="year" name="year" class="input is-small", style="width: 70px;" required>
-                            <button type="submit" class="btn btn-outline-primary btn-sm mb-2"
-                            class="input is-small">Generate table</button>
+                            <input type="number" class="btn btn-outline-primary btn-sm mb-2"id="year" name="year" class="input is-small", style="width: 70px;" required>
+                            <button type="submit" class="btn btn-outline-primary btn-sm mb-2"class="input is-small">Generate table</button>
                         </row>
                     </form>  
                 </div>
