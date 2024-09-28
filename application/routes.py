@@ -776,24 +776,31 @@ def tree():
     if goal_amount == 0 :
         image = "tree_images/tree1.png" 
         progress = 0
+        message = "Set your goal to start growing!"
 
     else:  # Avoid division by zero
         progress = (current_saving / goal_amount) * 100
         print(f'Progress: {progress}%')
 
-        if progress <= 25:
+        if progress < 0:
+            image = "tree_images/tree_die.jpg"
+            
+        elif progress <= 25:
             image = "tree_images/tree1.png"
-        
+            message = "Every little step counts. Keep going!"
+
         elif progress <= 60:
             image = "tree_images/tree2.png"
-
+            message = "You're halfway there! Stay focused!"
+            
         elif progress <=99:
             image = "tree_images/tree3.png"
+            message = "Almost there! Just a little more!"
    
         else:
             progress = 100
             image = "tree_images/tree_goal.jpg" 
-        
+            message = "Congratulations! You've achieved your goal!"   
 
     if form.validate_on_submit():
 
@@ -817,7 +824,7 @@ def tree():
 
         return redirect(url_for('tree'))
     
-    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month)
+    return render_template('tree.html', title="tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress)
 
 @app.route('/compare', methods=['GET', 'POST'])
 @login_required
@@ -933,7 +940,9 @@ def tree_goal(entry_id):
 
     else:
         progress = (current_saving / goal_amount) * 100
-        if progress <= 25:
+        if progress < 0:
+            image = "tree_images/tree_die.jpg"
+        elif progress <= 25:
             image = "tree_images/tree1.png"
         elif progress <= 60:
             image = "tree_images/tree2.png"
