@@ -740,6 +740,9 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     # Redirect to the specified page
     return redirect(next_page)
 
+<<<<<<< HEAD
+@app.route('/compare', methods=['GET', 'POST'])
+=======
 @app.route('/tree', methods=['POST', 'GET'])
 @login_required
 def tree():
@@ -829,6 +832,7 @@ def tree():
     return render_template('tree.html', title="Tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month, message=message)
 
 @app.route('/goals', methods=['GET', 'POST'])
+>>>>>>> 310d61d663326b79ed61528fbe8d98768f287b56
 @login_required
 def goals():
 
