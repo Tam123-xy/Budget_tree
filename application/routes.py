@@ -13,7 +13,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Define default categories (including their types, e.g., Income or Expense)
+# Create a list for default categories
 DEFAULT_CATEGORIES = [
     {"type": "Expense", "category": "🏡Rent"},
     {"type": "Expense", "category": "🍴 Food and Beverage"},
@@ -25,6 +25,7 @@ DEFAULT_CATEGORIES = [
     {"type": "Income", "category": "🤑Sideline"}
 ]
 
+# Combine expenses and incomes
 def combine_table(expenses,incomes):
     # Combine the entries
     entries = []
@@ -129,7 +130,8 @@ def register():
         # Commit all categories at once
         db.session.commit()
 
-        login_user(new_user)
+        # log in new user
+        login_user(new_user) 
         flash(f"You have successfully registered and login account {form.username.data}.", "success")
         return redirect(url_for('index'))
         
@@ -147,7 +149,7 @@ def logout():
 def delete_account():
     user = User.query.get(current_user.id)
 
-    # Delete the user's associated data (e.g., categories, transactions, etc.)
+    # Delete the user's associated data (e.g., categories, add_expenses, etc.)
     category.query.filter_by(user_id=user.id).delete()
     add_expenses.query.filter_by(user_id=user.id).delete()
     add_incomes.query.filter_by(user_id=user.id).delete()
@@ -165,7 +167,7 @@ def delete_account():
 @app.route('/account')
 @login_required
 def account():
-    return render_template('account.html', username=current_user.username)
+    return render_template('account.html', username=current_user.username,title="Account")
 
 @app.route('/index', methods = ["POST", "GET"])
 @login_required
@@ -418,7 +420,7 @@ def add_expense():
     # Query add_expenses models, sort it by date in descending order
     expenses = add_expenses.query.filter_by(user_id=current_user.id).order_by(add_expenses.date.desc()).all()
     
-    return render_template('add_expense.html', title="Add expense", form=form, expenses=expenses )
+    return render_template('add_expense.html', title="Expense", form=form, expenses=expenses )
     
 @app.route('/addincome', methods = ["POST", "GET"])
 @login_required
@@ -444,7 +446,7 @@ def add_income():
     # Query add_incomes models, sort it by date in descending order
     incomes = add_incomes.query.filter_by(user_id=current_user.id).order_by(add_incomes.date.desc()).all()
     
-    return render_template('add_income.html', title="Add income", form=form, incomes=incomes)
+    return render_template('add_income.html', title="Income", form=form, incomes=incomes)
 
 @app.route('/dashboard')
 @login_required
@@ -606,7 +608,7 @@ def categoryy():
     income = db.session.query(category.category, category.type).filter(and_(category.type == 'Income' ,category.user_id == current_user.id)).all()
     expense = db.session.query(category.category, category.type).filter(and_(category.type == 'Expense',category.user_id == current_user.id)).all()
     
-    return render_template('category.html', title="Create Category", form=form, income=income, expense=expense)
+    return render_template('category.html', form=form, income=income, expense=expense, title="Category")
 
 @app.route('/delete/<string:entry_category>/<string:entry_type>', methods=['POST', 'GET'])
 @login_required
@@ -738,9 +740,101 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     # Redirect to the specified page
     return redirect(next_page)
 
+<<<<<<< HEAD
 @app.route('/compare', methods=['GET', 'POST'])
+=======
+@app.route('/tree', methods=['POST', 'GET'])
 @login_required
-def compare():
+def tree():
+    form= GoalForm()
+
+    # Get the current month and year, transfer into year-month format
+    year = datetime.now().year
+    month = datetime.now().month
+    current_year_month = f'{year}-{int(month):02d}'
+
+    # Query this goal model with condition of current month and year
+    current_goal = goal.query.filter_by(month=month, year=year, user_id=current_user.id).first()
+    print(current_goal)
+
+    if current_goal:
+        goal_amount = current_goal.amount 
+
+    else:
+        goal_amount = 0
+
+    print(f'goal_amount{goal_amount}')
+
+    # Query this month total saving
+    sql_query = text("""SELECT SUM(amount) FROM net WHERE strftime('%Y-%m', date) = :current_year_month AND user_id = :user_id """)
+    result = db.session.execute(sql_query, {'current_year_month': current_year_month, 'user_id':current_user.id}).fetchone()
+
+    if result[0]== None:
+        current_saving = 0
+        
+    else:
+        current_saving = result[0]
+        
+
+    if goal_amount == 0 :
+        image = "tree_images/tree_die.jpg"
+        message = f"Set a goal for this month!"
+        progress = 0
+
+    elif current_saving <= 0 :
+        image = "tree_images/tree_die.jpg"
+        message = f"Take your first step to save RM {goal_amount}!"
+        progress = 0
+
+    else:  # Avoid division by zero
+        progress = (current_saving / goal_amount) * 100
+
+        if progress <= 25:
+            image = "tree_images/tree1.png"
+            message = f"Every little step counts. Keep going to save RM {goal_amount-current_saving}!"
+            
+        elif progress <= 60:
+            image = "tree_images/tree2.png"
+            message = f"You're halfway to saving RM {goal_amount}! Stay focused and try to save RM {goal_amount-current_saving} more!"
+
+        elif progress < 100:
+            image = "tree_images/tree3.png"
+            message = f"Almost there! Just RM {goal_amount-current_saving} left!"
+            
+        else:
+            progress = 100
+            image = "tree_images/tree_goal.jpg" 
+            message = f"Congratulations! You've achieved your goal RM {goal_amount}!"   
+        
+
+    if form.validate_on_submit():
+
+        # Check wheather has repeated month and year
+        month = int(form.month.data)
+        year = form.year.data
+        repeat_goal = db.session.query(goal).filter_by(month=month, year=year, user_id=current_user.id).first()
+
+        if repeat_goal:
+            repeat_goal.amount=form.amount.data
+            repeat_goal.month=form.month.data
+            repeat_goal.year=form.year.data
+            db.session.commit()
+
+        else:
+          # Save data into goal model
+            entry = goal(amount=form.amount.data, month=form.month.data, year=form.year.data, user_id=current_user.id)
+            db.session.add(entry)
+            db.session.commit()
+
+
+        return redirect(url_for('tree'))
+    
+    return render_template('tree.html', title="Tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month, message=message)
+
+@app.route('/goals', methods=['GET', 'POST'])
+>>>>>>> 310d61d663326b79ed61528fbe8d98768f287b56
+@login_required
+def goals():
 
     goall = goal.query.filter_by(user_id=current_user.id).all()
 
@@ -750,38 +844,9 @@ def compare():
         func.strftime('%Y-%m', net.date).label('month_year')
     ).filter_by(user_id=current_user.id).group_by(func.strftime('%Y-%m', net.date)).all()
 
-    # Create a dictionary for net results with 'month_year' as key
-    net_dict = {result.month_year: result.total for result in net_query}
+    amounts = goal_net(net_query,goall)
 
-    amounts = []
-
-    # Loop through each goal entry and compare with the net data
-    for goal_entry in goall:
-        # Create the formatted 'year-month' string for the goal entry
-        month_year = f'{goal_entry.year}-{int(goal_entry.month):02d}'
-
-        # Get the net amount if the month_year exists in net_dict, otherwise set net to 0
-        net_amount = net_dict.get(month_year, 0)
-
-        if goal_entry.amount == 0 :
-            progress = 0
-
-        else:  # Avoid division by zero
-            progress = ( net_amount / goal_entry.amount) * 100
-            progress = min(progress, 100)  # Cap progress at 100%
-
-        # Append the results
-        amounts.append({
-            'id':goal_entry.id,
-            'month_year': month_year,
-            'goal': goal_entry.amount,
-            'net': net_amount,
-            'progress' :progress
-        })
-
-        amounts.sort(key=lambda x: x['month_year'], reverse=True)
-
-    return render_template('goal.html', amounts=amounts)
+    return render_template('goals.html', amounts=amounts, title="Goals")
 
 @app.route('/delete/<int:entry_id>', methods=['POST', 'GET'])
 @login_required
@@ -794,7 +859,7 @@ def delete_goal(entry_id):
 
     flash('Deletion was successful', 'success')
     
-    return redirect(url_for('compare'))
+    return redirect(url_for('goals'))
 
 @app.route('/edit_goal/<int:entry_id>', methods=['POST', 'GET'])
 @login_required
@@ -810,7 +875,6 @@ def edit_goal(entry_id):
         form.year.data = result[3]
 
     if form.validate_on_submit():
-        print('save')
 
         goal_entry = goal.query.get(entry_id)
 
@@ -820,13 +884,13 @@ def edit_goal(entry_id):
        
         db.session.commit()
 
-        return redirect(url_for('compare'))
+        return redirect(url_for('goals'))
 
     return render_template('edit_goal.html', form=form)
 
-@app.route('/tree_goal/<int:entry_id>', methods=['GET'])
+@app.route('/tree_button/<int:entry_id>', methods=['GET'])
 @login_required
-def tree_goal(entry_id):
+def tree_button(entry_id):
 
     goal_entry = goal.query.get(entry_id)
     goal_amount = goal_entry.amount
@@ -846,25 +910,32 @@ def tree_goal(entry_id):
     print(f"goal_amount{goal_amount},current_year_month{current_year_month},net{current_saving}")
 
 
-    if goal_amount == 0:
-        image = "tree_images/tree1.png"
+    if current_saving <= 0 :
+        image = "tree_images/tree_die.jpg"
+        message = f"Take your first step to save RM {goal_amount}!"
         progress = 0
 
     else:
         progress = (current_saving / goal_amount) * 100
-        if progress < 0:
-            image = "tree_images/tree_die.jpg"
-        elif progress <= 25:
+
+        if progress <= 25:
             image = "tree_images/tree1.png"
+            message = f"Every little step counts. Keep going to save RM {goal_amount-current_saving}!"
+            
         elif progress <= 60:
             image = "tree_images/tree2.png"
-        elif progress <= 99:
-            image = "tree_images/tree3.png"
-        else:
-            image = "tree_images/tree_goal.jpg"
-            progress = 100
+            message = f"You're halfway to saving RM {goal_amount}! Stay focused and try to save RM {goal_amount-current_saving} more!"
 
-    return render_template('goal_progress.html', image=image, progress=progress, goal_amount=goal_amount, current_year_month=current_year_month, net=current_saving)
+        elif progress < 100:
+            image = "tree_images/tree3.png"
+            message = f"Almost there! Just RM {goal_amount-current_saving} left!"
+            
+        else:
+            progress = 100
+            image = "tree_images/tree_goal.jpg" 
+            message = f"Congratulations! You've achieved your goal RM {goal_amount}!"
+
+    return render_template('tree_button.html', image=image, progress=progress, goal_amount=goal_amount, current_year_month=current_year_month, net=current_saving,message=message)
 
 @app.route('/this_year_goaltable')
 @login_required

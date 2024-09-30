@@ -14,8 +14,8 @@
     <div class="column is-one-third is-offset-one-third">
         <form hx-post="/search_year_month" hx-target="#results" hx-swap="innerHTML">
             <row>
-                <button type='button' hx-get="/all_goaltable" hx-target="#results">All</button>
-                <button type='button' hx-get="/this_year_goaltable" hx-target="#results">This year</button></row>
+                <button type='button' class="btn btn-outline-success btn-sm mb-2"hx-get="/all_goaltable" hx-target="#results">All</button>
+                <button type='button' class="btn btn-outline-success btn-sm mb-2" hx-get="/this_year_goaltable" hx-target="#results">This year</button></row>
                 ⠀⠀⠀⠀⠀
                 <label for="month">Month:</label>
                 <select name="month" id="month" multiple>
@@ -34,8 +34,8 @@
                     <option value="12">December</option>
                 </select>
                 <label for="year">Year:</label>
-                <input type="number" id="year" name="year" class="input is-small", style="width: 70px;" required>
-                <button type="submit" class="input is-small">Generate table</button>
+                <input type="number" class="btn btn-outline-success btn-sm mb-2"id="year" name="year" class="input is-small", style="width: 70px;" required>
+                <button type="submit" class="btn btn-outline-success btn-sm mb-2" class="input is-small">Generate table</button>
             </row>
         </form>  
     </div>
@@ -72,7 +72,7 @@
                             {% endif %}
                             
                             <td>
-                                <a hx-get="{{ url_for('tree_goal', entry_id=entry.id, entry_net= entry.net) }}" hx-target="#goal-image-section" hx-swap="innerHTML">
+                                <a hx-get="{{ url_for('tree_button', entry_id=entry.id, entry_net= entry.net) }}" hx-target="#goal-image-section" hx-swap="innerHTML">
                                     <i class="fa-solid fa-tree" style="color: rgb(0, 100, 38);"></i>
                                 </a>                            
                             </td>

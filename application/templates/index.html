@@ -15,9 +15,9 @@
        <section class="section">
             <div class="columns">
                 <div class="column is-one-third is-offset-one-third">
-                    <button type='button' hx-get="/net_all_table" hx-target="#net_table">All</button>
-                    <button type='button' hx-get="/net_montly_table" hx-target="#net_table">Montly</button>
-                    <button type='button' hx-get="/net_yearly_table" hx-target="#net_table">Year</button>
+                    <button type='button' class="btn btn-outline-secondary btn-sm mb-2" hx-get="/net_all_table" hx-target="#net_table">All</button>
+                    <button type='button' class="btn btn-outline-secondary btn-sm mb-2" hx-get="/net_montly_table" hx-target="#net_table">Montly</button>
+                    <button type='button' class="btn btn-outline-secondary btn-sm mb-2" hx-get="/net_yearly_table" hx-target="#net_table">Year</button>
                 </div>
             </div>
 
@@ -54,10 +54,10 @@
                 <div class="column is-one-third is-offset-one-third">
                     <form hx-post="/set" hx-target="#results" hx-swap="innerHTML">
                         <row>
-                            <input type='text' class="input" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
-                            <button type='button' hx-get="/default_table" hx-target="#results">All</button>
-                            <button type='button' hx-get="/this_month_table" hx-target="#results">This month</button>
-                            <button type='button' hx-get="/last_7days_table" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                            <input type='text' class="btn btn-outline-secondary btn-sm mb-2" class="input" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+                            <button type='button' class="btn btn-outline-secondary btn-sm mb-2" hx-get="/default_table" hx-target="#results">All</button>
+                            <button type='button' class="btn btn-outline-secondary btn-sm mb-2" hx-get="/this_month_table" hx-target="#results">This month</button>
+                            <button type='button' class="btn btn-outline-secondary btn-sm mb-2" hx-get="/last_7days_table_income" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
                             <label for="month">Month:</label>
                             <select name="month" id="month" multiple>
                                 <option value="1">January</option>
@@ -74,8 +74,8 @@
                                 <option value="12">December</option>
                             </select>
                             <label for="year">Year:</label>
-                            <input type="number" id="year" name="year" class="input is-small", style="width: 70px;" required>
-                            <button type="submit" class="input is-small">Generate table</button>
+                            <input type="number" class="btn btn-outline-secondary btn-sm mb-2" id="year" name="year" class="input is-small", style="width: 70px;" required>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm mb-2" class="input is-small">Generate table</button>
                         </row>
                     </form>  
                 </div>
@@ -116,7 +116,7 @@
                     {% endfor %}
                 {% else %}
                     <tr> 
-                        <td colspan="4">No records found. Let's start recording your expenses and incomes.</td>
+                        <td colspan="4">No records found. Let's start recording your expenses and incomes!</td>
                     </tr>
                 {% endif %}
                 </tbody>

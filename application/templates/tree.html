@@ -42,6 +42,7 @@
 
 <div class="container">
     <h3>Your Goal for This Month ({{ current_date }}):</h3>
+    <h3> {{ message }}</h3>
     <table class="table">
         <tbody>
             <tr>
@@ -60,7 +61,6 @@
 
         </tbody>
     </table>
-    <strong>{{ message }}</strong>
     <img src="{{ url_for('static', filename=image) }}" class="img-fluid" alt="Tree Progress">
 </div>
 

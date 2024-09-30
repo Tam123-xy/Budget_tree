@@ -58,10 +58,11 @@
             <div class="column is-one-third is-offset-one-third">
                 <form hx-post="/set_expense" hx-target="#results" hx-swap="innerHTML">
                     <row>
-                        <input type='text' class="input" placeholder="Search" name="q" hx-get="/search_expense" hx-trigger="keyup changed delay:500ms" hx-target="#results">
-                        <button type='button' hx-get="/default_table_expense" hx-target="#results">All</button>
-                        <button type='button' hx-get="/this_month_table_expense" hx-target="#results">This month</button>
-                        <button type='button' hx-get="/last_7days_table_expense" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                        <input type='text' class="btn btn-outline-danger btn-sm mb-2" class="input" placeholder="Search" name="q" hx-get="/search_expense" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+                        <button type='button' class="btn btn-outline-danger btn-sm mb-2" hx-get="/default_table_expense" hx-target="#results">All</button>
+                        <button type='button' class="btn btn-outline-danger btn-sm mb-2"hx-get="/this_month_table_expense" hx-target="#results">This month</button>
+                        <button type='button' class="btn btn-outline-danger btn-sm mb-2"hx-get="/last_7days_table_expense" hx-target="#results">Last 7 days</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                        
                         <label for="month">Month:</label>
                         <select name="month" id="month" multiple>
                             <option value="1">January</option>
@@ -77,9 +78,10 @@
                             <option value="11">November</option>
                             <option value="12">December</option>
                         </select>
+                        
                         <label for="year">Year:</label>
-                        <input type="number" id="year" name="year" class="input is-small", style="width: 70px;" required>
-                        <button type="submit" class="input is-small">Generate table</button>
+                        <input type="number" class="btn btn-outline-danger btn-sm mb-2"id="year" name="year" class="input is-small", style="width: 70px;" required>
+                        <button type="submit" class="btn btn-outline-danger btn-sm mb-2"class="input is-small">Generate table</button>
                     </row>
                 </form>  
             </div>
@@ -114,7 +116,7 @@
                     {% endfor %}
                 {% else %}
                     <tr> 
-                        <td colspan="4">No expense records found. Let's start recording your expenses.</td>
+                        <td colspan="4">No expense records found. Let's start recording your expenses!</td>
                     </tr>
                 {% endif %}
             </tbody>
