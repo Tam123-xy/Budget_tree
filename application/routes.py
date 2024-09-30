@@ -774,12 +774,12 @@ def tree():
         
 
     if goal_amount == 0 :
-        image = "tree_images/tree_die.jpg"
+        image = "tree_images/tree_die.jpg" #no goal set
         message = f"Set a goal for this month!"
         progress = 0
 
     elif current_saving <= 0 :
-        image = "tree_images/tree_die.jpg"
+        image = "tree_images/tree_die.jpg" #tree die
         message = f"Take your first step to save RM {goal_amount}!"
         progress = 0
 
@@ -787,20 +787,20 @@ def tree():
         progress = (current_saving / goal_amount) * 100
 
         if progress <= 25:
-            image = "tree_images/tree1.png"
+            image = "tree_images/tree1.png" #first image
             message = f"Every little step counts. Keep going to save RM {goal_amount-current_saving}!"
             
         elif progress <= 60:
-            image = "tree_images/tree2.png"
+            image = "tree_images/tree2.png" #second image
             message = f"You're halfway to saving RM {goal_amount}! Stay focused and try to save RM {goal_amount-current_saving} more!"
 
         elif progress < 100:
-            image = "tree_images/tree3.png"
+            image = "tree_images/tree3.png" #third image
             message = f"Almost there! Just RM {goal_amount-current_saving} left!"
             
         else:
             progress = 100
-            image = "tree_images/tree_goal.jpg" 
+            image = "tree_images/tree_goal.jpg" #goal image
             message = f"Congratulations! You've achieved your goal RM {goal_amount}!"   
         
 
