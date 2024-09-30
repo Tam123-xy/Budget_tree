@@ -740,9 +740,6 @@ def delete(entry_id, entry_type, entry_amount, entry_date):
     # Redirect to the specified page
     return redirect(next_page)
 
-<<<<<<< HEAD
-@app.route('/compare', methods=['GET', 'POST'])
-=======
 @app.route('/tree', methods=['POST', 'GET'])
 @login_required
 def tree():
@@ -831,8 +828,52 @@ def tree():
     
     return render_template('tree.html', title="Tree", form=form, goal= goal_amount, image= image, net_monthly_table= current_saving, progres=progress, current_date=current_year_month, message=message)
 
+@app.route('/compare', methods=['GET', 'POST'])
+@login_required
+def compare():
+
+    goall = goal.query.filter_by(user_id=current_user.id).all()
+
+    # Query to sum the amount in the 'net' model, grouped by year-month
+    net_query = db.session.query(
+        func.sum(net.amount).label('total'),
+        func.strftime('%Y-%m', net.date).label('month_year')
+    ).filter_by(user_id=current_user.id).group_by(func.strftime('%Y-%m', net.date)).all()
+
+    # Create a dictionary for net results with 'month_year' as key
+    net_dict = {result.month_year: result.total for result in net_query}
+
+    amounts = []
+
+    # Loop through each goal entry and compare with the net data
+    for goal_entry in goall:
+        # Create the formatted 'year-month' string for the goal entry
+        month_year = f'{goal_entry.year}-{int(goal_entry.month):02d}'
+
+        # Get the net amount if the month_year exists in net_dict, otherwise set net to 0
+        net_amount = net_dict.get(month_year, 0)
+
+        if goal_entry.amount == 0 :
+            progress = 0
+
+        else:  # Avoid division by zero
+            progress = ( net_amount / goal_entry.amount) * 100
+            progress = min(progress, 100)  # Cap progress at 100%
+
+        # Append the results
+        amounts.append({
+            'id':goal_entry.id,
+            'month_year': month_year,
+            'goal': goal_entry.amount,
+            'net': net_amount,
+            'progress' :progress
+        })
+
+        amounts.sort(key=lambda x: x['month_year'], reverse=True)
+
+    return render_template('goal.html', amounts=amounts)
+
 @app.route('/goals', methods=['GET', 'POST'])
->>>>>>> 310d61d663326b79ed61528fbe8d98768f287b56
 @login_required
 def goals():
 
