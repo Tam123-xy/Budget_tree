@@ -5,35 +5,37 @@
 <!-- buttons --> 
 <div class="col-xs-12 col-sm-12 col-md-12">
     <form class="form-inline" action="{{ url_for('dashboard') }}" method="GET">
+        
+
+        <div class="form-group mx-sm-3 mb-2">
+            <select id="month" class="form-control" style="width: 150px;" name="month">
+                <option value=""></option>
+                <option value="01">January</option>
+                <option value="02">February</option>
+                <option value="03">March</option>
+                <option value="04">April</option>
+                <option value="05">May</option>
+                <option value="06">June</option>
+                <option value="07">July</option>
+                <option value="08">August</option>
+                <option value="09">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+        </div>
+
         <div class="form-group mb-2">
-        <input type="number" min="2000" max="2050" style="width: 150px;"
-             class="form-control" name="year" id="year" placeholder="Select Year">
-</div>
-
-    <div class="form-group mx-sm-3 mb-2">
-        <select id="month" class="form-control" style="width: 150px;" name="month">
-            <option value=""></option>
-            <option value="01">January</option>
-            <option value="02">February</option>
-            <option value="03">March</option>
-            <option value="04">April</option>
-            <option value="05">May</option>
-            <option value="06">June</option>
-            <option value="07">July</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-        </select>
-    </div>
+            <input type="number" min="2000" max="2050" style="width: 150px;"
+                class="form-control" name="year" id="year" placeholder="Select Year">
+        </div>
     
-    <button type="submit" class="btn btn-primary mr-2 mb-2">Filter</button>
-    <button type="submit" class="btn btn-dark mb-2 mr-2" onclick="setThisMonth()">This Month</button>
+        <button type="submit" class="btn btn-primary mr-2 mb-2">Filter</button>⠀⠀⠀
+        <button type="submit" class="btn btn-dark mb-2 mr-2" onclick="setThisMonth()">This Month</button>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 
-    <h3><span id="currentFilter">Showing data for: {{ current_month_year }}</span></h3>
-    
-    </script>
+        <h3><span id="currentFilter">Showing data for: {{ current_month_year }}</span></h3>
+        
+        </script>
 
     </form>
 
