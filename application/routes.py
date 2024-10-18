@@ -194,14 +194,22 @@ def index():
 @app.route('/set', methods=['POST','GET'])
 @login_required
 def set():
+
     month = request.form.get('month')
     year = request.form.get('year')
-   
-    current_year_month = f'{year}-{int(month):02d}'
-   
-    expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
-    incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date, ) == current_year_month, add_incomes.user_id == current_user.id)).all()
+
+    if month=='13':
+        current_year_month = f' year of {year}'
+        expenses = add_expenses.query.filter(and_(func.strftime('%Y', add_expenses.date) == year, add_expenses.user_id == current_user.id)).all()
+        incomes = add_incomes.query.filter(and_(func.strftime('%Y', add_incomes.date, ) == year, add_incomes.user_id == current_user.id)).all()
+
+    else:
+
+        current_year_month = f'{year}-{int(month):02d}'
     
+        expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
+        incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date, ) == current_year_month, add_incomes.user_id == current_user.id)).all()
+        
     entries = combine_table(expenses,incomes)
       
     return render_template('default_table.html',entries=entries, current_year_month=current_year_month)
@@ -213,13 +221,24 @@ def set_income():
     # Get the month and year which are setted by user 
     month = request.form.get('month')
     year = request.form.get('year')
-   
-    # year-month format
-    current_year_month = f'{year}-{int(month):02d}'
 
-    # Query add_incomes models with the condition of the year-month
-    incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date) == current_year_month , add_incomes.user_id == current_user.id)).all()
+    if month=='13':
+        current_year_month = f' year of {year}'
+        incomes = add_incomes.query.filter(and_(func.strftime('%Y', add_incomes.date) == year , add_incomes.user_id == current_user.id)).all()
+       
+    elif month and year:
+        # year-month format
+        current_year_month = f'{year}-{int(month):02d}'
+
+        # Query add_incomes models with the condition of the year-month
+        incomes = add_incomes.query.filter(and_(func.strftime('%Y-%m', add_incomes.date) == current_year_month , add_incomes.user_id == current_user.id)).all()
+
+    else: 
+        current_year_month = 'income'
+        incomes = add_incomes.query.filter_by(user_id=current_user.id).order_by(add_incomes.date.desc()).all()
+
     incomes.sort(key=lambda x: x.date, reverse=True)
+
 
     return render_template('default_table_income.html',incomes=incomes, current_year_month=current_year_month)
 
@@ -229,10 +248,18 @@ def set_expense():
     # Get the month and year which are setted by user, transfer into year-month format
     month = request.form.get('month')
     year = request.form.get('year')
-    current_year_month = f'{year}-{int(month):02d}'
 
-   # Query add_incomes models with the condition of the year-month, sort it by date in descending order
-    expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
+    if month=='13':
+        current_year_month = f' year of {year}'
+        expenses = add_expenses.query.filter(and_(func.strftime('%Y', add_expenses.date) == year, add_expenses.user_id == current_user.id)).all()
+       
+    else:
+        # year-month format
+        current_year_month = f'{year}-{int(month):02d}'
+
+        # Query add_incomes models with the condition of the year-month, sort it by date in descending order
+        expenses = add_expenses.query.filter(and_(func.strftime('%Y-%m', add_expenses.date) == current_year_month, add_expenses.user_id == current_user.id)).all()
+
     expenses.sort(key=lambda x: x.date, reverse=True)
 
     return render_template('default_table_expense.html',expenses=expenses,current_year_month=current_year_month)
@@ -447,6 +474,24 @@ def add_income():
     incomes = add_incomes.query.filter_by(user_id=current_user.id).order_by(add_incomes.date.desc()).all()
     
     return render_template('add_income.html', title="Income", form=form, incomes=incomes)
+
+@app.route('/expense_index', methods = ["POST", "GET"])
+@login_required
+def expense_index():
+    
+    # Query add_expenses models, sort it by date in descending order
+    expenses = add_expenses.query.filter_by(user_id=current_user.id).order_by(add_expenses.date.desc()).all()
+    
+    return render_template('expense_index.html', title="Expense", expenses=expenses )
+    
+@app.route('/income_index', methods = ["POST", "GET"])
+@login_required
+def income_index():
+    
+    # Query add_incomes models, sort it by date in descending order
+    incomes = add_incomes.query.filter_by(user_id=current_user.id).order_by(add_incomes.date.desc()).all()
+    
+    return render_template('income_index.html', title="Income", incomes=incomes)
 
 @app.route('/dashboard')
 @login_required
